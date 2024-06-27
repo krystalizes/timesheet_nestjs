@@ -1,5 +1,12 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import * as dotenv from 'dotenv';
+import { User } from 'src/typeorm/entities/User';
+import { Task } from 'src/typeorm/entities/Task';
+import { Branch } from 'src/typeorm/entities/Branch';
+import { User_project } from 'src/typeorm/entities/User_project';
+import { Project } from 'src/typeorm/entities/Project';
+import { Client } from 'src/typeorm/entities/Client';
+import { Timesheet } from 'src/typeorm/entities/Timesheet';
 dotenv.config();
 export const dataSourceOptions: DataSourceOptions = {
   type: process.env.DATABASE_CONNECTION as 'mysql',
@@ -8,7 +15,7 @@ export const dataSourceOptions: DataSourceOptions = {
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_DB_NAME,
-  entities: ['dist/typeorm/entities/*{.ts,.js}'],
+  entities: [User, Task, Branch, User_project, Project, Client, Timesheet],
   migrations: ['dist/config/database/migrations/*{.ts,.js}'],
 };
 const dataSource = new DataSource(dataSourceOptions);
