@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
@@ -28,12 +36,12 @@ export class ProjectController {
   }
 
   @Get('search/:input')
-  searchByClientorName(@Param('input') input:string){
+  searchByClientorName(@Param('input') input: string) {
     return this.projectService.searchByClientorName(input);
   }
 
   @Get('/filter/:status')
-  filterProjects(@Param('status') status:string) {
+  filterProjects(@Param('status') status: string) {
     return this.projectService.filterProjects(status);
   }
 
@@ -47,7 +55,7 @@ export class ProjectController {
     return this.projectService.remove(id);
   }
   @Patch('/restore/:id')
-  restore(@Param('id' ) id: number) {
+  restore(@Param('id') id: number) {
     return this.projectService.restore(id);
   }
 }

@@ -8,24 +8,32 @@ import { EntityManager, Repository } from 'typeorm';
 @Injectable()
 export class UserProjectService {
   constructor(
-    @InjectRepository(User_project) private UserProjectRepository:Repository<User_project>,
-  ){}
+    @InjectRepository(User_project)
+    private UserProjectRepository: Repository<User_project>,
+  ) {}
   // tạo user_project mới, tạo khi tạo project thì sẽ trong transaction
-  async create(createUserProjectDto: CreateUserProjectDto, entityManager?: EntityManager){
+  async create(
+    createUserProjectDto: CreateUserProjectDto,
+    entityManager?: EntityManager,
+  ) {
     if (entityManager) {
-      const userProject = entityManager.create(User_project, createUserProjectDto);
+      const userProject = entityManager.create(
+        User_project,
+        createUserProjectDto,
+      );
       return await entityManager.save(userProject);
     } else {
-      const userProject = this.UserProjectRepository.create(createUserProjectDto);
+      const userProject =
+        this.UserProjectRepository.create(createUserProjectDto);
       return await this.UserProjectRepository.save(userProject);
     }
   }
   // tìm các user trong 1 project
   async findAllUserInPrj(id: number) {
     return await this.UserProjectRepository.find({
-      select:['user'],
-      where: { project: { id: id }   },
-      relations: ["user"]
+      select: ['user'],
+      where: { project: { id: id } },
+      relations: ['user'],
     });
   }
   // tìm các project mà user đang join
@@ -34,40 +42,45 @@ export class UserProjectService {
       where: { user: { id: id } },
       relations: ['project'],
     });
-    return userProjects.filter(up => up.project.status !== 'Inactive');
+    return userProjects.filter((up) => up.project.status !== 'Inactive');
   }
   // trả về role trong project của user
-  async findRoleUser(prj_id: number, user_id:number) {
+  async findRoleUser(prj_id: number, user_id: number) {
     return await this.UserProjectRepository.find({
-      select:['role'],
-      where: { 
-        user: { id: user_id }, 
-        project: { id: prj_id }  
+      select: ['role'],
+      where: {
+        user: { id: user_id },
+        project: { id: prj_id },
       },
     });
   }
   // update
-  async updateRole(prj_id: number, user_id:number, updateUserProjectDto: UpdateUserProjectDto) {
+  async updateRole(
+    prj_id: number,
+    user_id: number,
+    updateUserProjectDto: UpdateUserProjectDto,
+  ) {
     await this.UserProjectRepository.update(
-      { user: { id: user_id }, project: { id: prj_id } }, 
-      updateUserProjectDto
+      { user: { id: user_id }, project: { id: prj_id } },
+      updateUserProjectDto,
     );
-    return this.UserProjectRepository.findOneByOrFail(
-      { user: { id: user_id }, project: { id: prj_id } }
-    );
+    return this.UserProjectRepository.findOneByOrFail({
+      user: { id: user_id },
+      project: { id: prj_id },
+    });
   }
   // tìm các project mà user là Manager
-  async findProjectIsManager(id:number){
+  async findProjectIsManager(id: number) {
     return await this.UserProjectRepository.find({
-      where:{
+      where: {
         user: { id },
-        role: "Manager"
+        role: 'Manager',
       },
-      relations:['project']
-    })
+      relations: ['project'],
+    });
   }
   // force delete( xoá user ra khỏi project )
-  async remove(prj_id: number, user_id:number) {
+  async remove(prj_id: number, user_id: number) {
     return await this.UserProjectRepository.delete({
       user: { id: user_id },
       project: { id: prj_id },

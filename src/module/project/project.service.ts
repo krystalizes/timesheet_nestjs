@@ -14,14 +14,14 @@ import { TimesheetService } from '../timesheet/timesheet.service';
 @Injectable()
 export class ProjectService {
   constructor(
-    @InjectRepository(Project) 
-    private ProjectRepository:Repository<Project>,
+    @InjectRepository(Project)
+    private ProjectRepository: Repository<Project>,
     private userService: UserService,
     private taskService: TaskService,
     private userProjectService: UserProjectService,
     private timesheetService: TimesheetService,
     private readonly entityManager: EntityManager,
-  ){}
+  ) {}
   // tạo project mới, nếu add thêm user ngay ở trang tạo project thì sẽ add luôn vào user_project
   // sau đó thêm 5 task common cho mọi project, nếu lỗi thì sẽ rollback
   async create(createProjectDto: CreateProjectDto) {
@@ -37,7 +37,10 @@ export class ProjectService {
             user: user,
             project: project,
           };
-          return this.userProjectService.create(createUserProjectDto, transactionalEntityManager);
+          return this.userProjectService.create(
+            createUserProjectDto,
+            transactionalEntityManager,
+          );
         });
         await Promise.all(userProjectPromises);
       }
@@ -58,16 +61,19 @@ export class ProjectService {
           status: 'Active',
           project: project,
         };
-        return this.taskService.create(createTaskDto,transactionalEntityManager);
+        return this.taskService.create(
+          createTaskDto,
+          transactionalEntityManager,
+        );
       });
 
       await Promise.all(taskPromises);
-      return  project ;
+      return project;
     });
   }
   // get all project
   findAll() {
-    return this.ProjectRepository.find({relations:["client"]});
+    return this.ProjectRepository.find({ relations: ['client'] });
   }
   // get 1 project
   findOne(id: number) {
@@ -77,9 +83,9 @@ export class ProjectService {
     });
   }
   // lấy tất cả project của 1 client
-  findPrjOfClient(id:number){
+  findPrjOfClient(id: number) {
     return this.ProjectRepository.find({
-      where: [{client:{id}}],  
+      where: [{ client: { id } }],
       relations: ['client'],
     });
   }
@@ -95,9 +101,10 @@ export class ProjectService {
   }
   // flter project theo status
   filterProjects(status: string) {
-    return this.ProjectRepository.find({ 
-      where: {status}, 
-      relations: ['client'] });
+    return this.ProjectRepository.find({
+      where: { status },
+      relations: ['client'],
+    });
   }
   // update
   async update(id: number, updateProjectDto: UpdateProjectDto) {
@@ -108,7 +115,9 @@ export class ProjectService {
   async remove(id: number) {
     const timesheets = await this.timesheetService.checkProject(id);
     if (timesheets) {
-      throw new BadRequestException('Cannot delete project with associated timesheets');
+      throw new BadRequestException(
+        'Cannot delete project with associated timesheets',
+      );
     }
     return this.ProjectRepository.softDelete(id);
   }

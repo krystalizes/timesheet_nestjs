@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -18,12 +26,12 @@ export class TaskController {
   }
 
   @Get('search/:input')
-  searchByName(@Param('input') input:string){
+  searchByName(@Param('input') input: string) {
     return this.taskService.searchByName(input);
   }
 
   @Get('/filter/:status')
-  filterTasks(@Param('status') status:string) {
+  filterTasks(@Param('status') status: string) {
     return this.taskService.filterTasks(status);
   }
 
@@ -47,8 +55,7 @@ export class TaskController {
     return this.taskService.remove(id);
   }
   @Patch('/restore/:id')
-  restore(@Param('id' ) id: number) {
+  restore(@Param('id') id: number) {
     return this.taskService.restore(id);
   }
-  
 }

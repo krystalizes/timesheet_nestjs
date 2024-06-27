@@ -9,7 +9,13 @@ import { TaskModule } from '../task/task.module';
 import { TimesheetModule } from '../timesheet/timesheet.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Project]),UserProjectModule,UserModule,TaskModule,TimesheetModule],
+  imports: [
+    TypeOrmModule.forFeature([Project]),
+    UserProjectModule,
+    UserModule,
+    TaskModule,
+    TimesheetModule,
+  ],
   controllers: [ProjectController],
   providers: [ProjectService],
 })

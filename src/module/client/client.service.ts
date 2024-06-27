@@ -7,8 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
 export class ClientService {
   constructor(
-    @InjectRepository(Client) private ClientRepository:Repository<Client>,
-  ){}
+    @InjectRepository(Client) private ClientRepository: Repository<Client>,
+  ) {}
   // tạo client
   create(createClientDto: CreateClientDto) {
     return this.ClientRepository.save(createClientDto);
@@ -19,12 +19,11 @@ export class ClientService {
   }
   // get 1 client
   findOne(id: number) {
-    return this.ClientRepository.findOneBy({id});
+    return this.ClientRepository.findOneBy({ id });
   }
   // update 1 client
   async update(id: number, updateClientDto: UpdateClientDto) {
     await this.ClientRepository.update(id, updateClientDto);
     return this.ClientRepository.findOneByOrFail({ id });
   }
-
 }

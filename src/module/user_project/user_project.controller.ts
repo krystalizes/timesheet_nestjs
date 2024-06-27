@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { UserProjectService } from './user_project.service';
 import { CreateUserProjectDto } from './dto/create-user_project.dto';
 import { UpdateUserProjectDto } from './dto/update-user_project.dto';
@@ -11,7 +19,7 @@ export class UserProjectController {
   create(@Body() createUserProjectDto: CreateUserProjectDto) {
     return this.userProjectService.create(createUserProjectDto);
   }
-  
+
   @Get('/team_manage/:user_id')
   findProjectIsManager(@Param('user_id') id: number) {
     return this.userProjectService.findProjectIsManager(id);
@@ -32,8 +40,15 @@ export class UserProjectController {
   }
 
   @Patch('/:prj_id/:user_id')
-  updateRole(@Param() params: { [key: string]: number }, @Body() updateUserProjectDto: UpdateUserProjectDto) {
-    return this.userProjectService.updateRole(params.prj_id, params.user_id, updateUserProjectDto);
+  updateRole(
+    @Param() params: { [key: string]: number },
+    @Body() updateUserProjectDto: UpdateUserProjectDto,
+  ) {
+    return this.userProjectService.updateRole(
+      params.prj_id,
+      params.user_id,
+      updateUserProjectDto,
+    );
   }
 
   @Delete('/:prj_id/:user_id')

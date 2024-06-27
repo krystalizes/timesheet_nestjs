@@ -1,11 +1,11 @@
-import { Project } from "src/typeorm/entities/Project";
+import { Project } from 'src/typeorm/entities/Project';
 
 export class CreateTaskDto {
-    name:string;
-    start_date:Date;
-    end_date:Date;
-    description:string;
-    type:string;
-    status:string;
-    project: Project;
+  name: string;
+  start_date: Date;
+  end_date: Date;
+  description: string;
+  type: string;
+  status: string;
+  project: Project;
 }
