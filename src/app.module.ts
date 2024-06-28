@@ -7,6 +7,7 @@ import { UserProjectModule } from './module/user_project/user_project.module';
 import { TaskModule } from './module/task/task.module';
 import { TimesheetModule } from './module/timesheet/timesheet.module';
 import { dataSourceOptions } from './config/database/ormConfig';
+import { AuthModule } from './module/auth/auth.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { dataSourceOptions } from './config/database/ormConfig';
     UserProjectModule,
     TaskModule,
     TimesheetModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
