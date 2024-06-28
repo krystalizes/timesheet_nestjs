@@ -1,10 +1,17 @@
+import { Exclude } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { Branch } from 'src/typeorm/entities/Branch';
 
-export class createUserDto {
+export class AuthDto {
   username: string;
   branch: Branch;
-  password: string;
+  @IsEmail()
+  @IsNotEmpty()
   email: string;
+  @IsString()
+  @IsNotEmpty()
+  @Exclude()
+  password: string;
   name: string;
   address: string;
   DoB: Date;
@@ -15,4 +22,8 @@ export class createUserDto {
   position: string;
   user_type: string;
   user_level: string;
+  @Exclude()
+  hash?: string;
+  @Exclude()
+  hashedRt?: string;
 }

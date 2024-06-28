@@ -1,9 +1,9 @@
 import { User } from '../../typeorm/entities/User';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { createUserDto } from 'src/module/user/dto/createUser.dto';
 import { Repository } from 'typeorm';
 import { updateUserDto } from './dto/updateUser.dto';
+import { AuthDto } from '../auth/dto/auth.dto';
 
 @Injectable()
 export class UserService {
@@ -21,8 +21,14 @@ export class UserService {
       relations: ['branch'],
     });
   }
+  async findOne(email: string) {
+    return this.UserRepository.findOne({
+      where: { email },
+      relations: ['branch'],
+    });
+  }
   // tạo user
-  createUser(createUserDto: createUserDto) {
+  createUser(createUserDto: AuthDto) {
     return this.UserRepository.save(createUserDto);
   }
   // update user
