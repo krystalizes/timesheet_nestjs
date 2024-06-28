@@ -70,8 +70,6 @@ export class User {
   })
   role: string;
   @Column()
-  hash: string;
-  @Column()
   hashedRt: string;
   @CreateDateColumn()
   created_at: Date;

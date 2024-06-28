@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -47,26 +47,22 @@ export class AuthService {
     dto.password = hash;
     const newUser = await this.userService.createUser(dto);
     const tokens = await this.getTokens(newUser.id, newUser.email);
-    await this.updateRtHash(newUser.id, tokens);
+    await this.updateRtHash(newUser.id, tokens.refresh_token);
     return tokens;
   }
-  async updateRtHash(userId: number, token: Tokens) {
-    const hash = await this.hashData(token.access_token);
-    const hashedRt = await this.hashData(token.refresh_token);
-    await this.userService.updateUser(userId, { hash, hashedRt });
+  async updateRtHash(userId: number, rt: string) {
+    const hashedRt = await this.hashData(rt);
+    await this.userService.updateUser(userId, { hashedRt });
   }
-  // async signIn(email: string, pass: string){
-  //   const user = await this.userService.findOne(email);
-  //   if (user?.password !== pass) {
-  //     throw new UnauthorizedException();
-  //   }
-  //   const { password, ...result } = user;
-  //   // TODO: Generate a JWT and return it here
-  //   // instead of the user object
-  //   const payload = { sub: user.id, username: user.email };
-  //   return {
-  //     access_token: await this.jwtService.signAsync(payload),
-  //   };
-  //   return result;
-  // }
+  async signIn(dto: AuthDto): Promise<Tokens> {
+    const user = await this.userService.findOne(dto.email);
+    if (!user) throw new ForbiddenException('Access Denied');
+    const passwordMatches = await bcrypt.compare(dto.password, user.password);
+    if (!passwordMatches) throw new ForbiddenException('Access Denied');
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRtHash(user.id, tokens.refresh_token);
+    return tokens;
+  }
+  login() {}
+  refresh_token() {}
 }

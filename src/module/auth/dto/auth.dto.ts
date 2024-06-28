@@ -23,7 +23,5 @@ export class AuthDto {
   user_type: string;
   user_level: string;
   @Exclude()
-  hash?: string;
-  @Exclude()
-  hashedRt?: string;
+  hashedRt: string;
 }

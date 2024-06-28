@@ -11,4 +11,9 @@ export class AuthController {
   signUp(@Body() signUpDto: AuthDto): Promise<Tokens> {
     return this.authService.signUp(signUpDto);
   }
+  @HttpCode(HttpStatus.OK)
+  @Post('login')
+  signIn(@Body() signInDto: AuthDto): Promise<Tokens> {
+    return this.authService.signIn(signInDto);
+  }
 }
