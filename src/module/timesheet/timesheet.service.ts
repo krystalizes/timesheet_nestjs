@@ -115,7 +115,7 @@ export class TimesheetService {
       })
       .execute();
   }
-  // approve timesheet theo week(Manager)(Có thể sửa thành bao gồm Rejected)
+  // Reject timesheet theo week(Manager)
   async reject(timesheetIds: number[]) {
     return await this.TimesheetRepository.createQueryBuilder('timesheet')
       .update(Timesheet)

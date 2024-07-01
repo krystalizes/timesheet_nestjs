@@ -10,6 +10,8 @@ import {
 import { TimesheetService } from './timesheet.service';
 import { CreateTimesheetDto } from './dto/create-timesheet.dto';
 import { UpdateTimesheetDto } from './dto/update-timesheet.dto';
+import { Roles } from '../auth/common/decorator/get-role-user.decorator';
+import { Role } from '../auth/common/enum/role.enum';
 
 @Controller('timesheet')
 export class TimesheetController {
@@ -24,12 +26,12 @@ export class TimesheetController {
   findOne(@Param('id') id: number) {
     return this.timesheetService.findOne(id);
   }
-
+  @Roles(Role.PM)
   @Get('/pending/:id')
   getTimesheetPend(@Param('id') id: number) {
     return this.timesheetService.getTimesheetPend(id);
   }
-
+  @Roles(Role.PM)
   @Get('/project/:prj_id')
   findTimesheetInProject(@Param('prj_id') id: number) {
     return this.timesheetService.getTotalWorkTimeByTaskType(id);
@@ -51,12 +53,12 @@ export class TimesheetController {
   ) {
     return this.timesheetService.findTimesheetWeek(user_id, start, end);
   }
-
+  @Roles(Role.PM)
   @Patch('/approve')
   approve(@Body() timesheetids: number[]) {
     return this.timesheetService.approve(timesheetids);
   }
-
+  @Roles(Role.PM)
   @Patch('/reject')
   reject(@Body() timesheetids: number[]) {
     return this.timesheetService.reject(timesheetids);

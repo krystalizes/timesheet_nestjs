@@ -42,9 +42,10 @@ export class User {
   work_time: string;
   @Column({
     type: 'enum',
-    enum: ['Dev', 'HR', 'PM', 'CEO'],
+    enum: ['Dev', 'HR', 'PM', 'CEO', 'Admin'],
+    nullable: true,
   })
-  position: string;
+  role: string;
   @Column({
     type: 'enum',
     enum: ['Staff', 'Intern', 'Colaborator'],
@@ -63,12 +64,6 @@ export class User {
     ],
   })
   user_level: string;
-  @Column({
-    type: 'enum',
-    enum: ['Admin', 'User'],
-    default: 'User',
-  })
-  role: string;
   @Column({ nullable: true })
   hashedRt: string;
   @CreateDateColumn()

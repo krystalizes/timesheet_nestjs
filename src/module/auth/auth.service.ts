@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import * as argon from 'argon2';
 import { Tokens } from './types/token.type';
 import { AuthDto } from './dto/auth.dto';
 
@@ -12,14 +12,19 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
   hashData(data: string) {
-    return bcrypt.hash(data, 10);
+    return argon.hash(data);
   }
-  async getTokens(userId: number, email: string): Promise<Tokens> {
+  async getTokens(
+    userId: number,
+    email: string,
+    role: string,
+  ): Promise<Tokens> {
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync(
         {
           id: userId,
           email,
+          role,
         },
         {
           secret: process.env.JWT_SECRET,
@@ -30,6 +35,7 @@ export class AuthService {
         {
           id: userId,
           email,
+          role,
         },
         {
           secret: process.env.JWT_REFRESH_SECRET,
@@ -46,7 +52,11 @@ export class AuthService {
     const hash = await this.hashData(dto.password);
     dto.password = hash;
     const newUser = await this.userService.createUser(dto);
-    const tokens = await this.getTokens(newUser.id, newUser.email);
+    const tokens = await this.getTokens(
+      newUser.id,
+      newUser.email,
+      newUser.role,
+    );
     await this.updateRtHash(newUser.id, tokens.refresh_token);
     return tokens;
   }
@@ -57,9 +67,9 @@ export class AuthService {
   async signIn(dto: AuthDto): Promise<Tokens> {
     const user = await this.userService.findOne(dto.email);
     if (!user) throw new ForbiddenException('Access Denied');
-    const passwordMatches = await bcrypt.compare(dto.password, user.password);
+    const passwordMatches = await argon.verify(user.password, dto.password);
     if (!passwordMatches) throw new ForbiddenException('Access Denied');
-    const tokens = await this.getTokens(user.id, user.email);
+    const tokens = await this.getTokens(user.id, user.email, user.role);
     await this.updateRtHash(user.id, tokens.refresh_token);
     return tokens;
   }
@@ -69,9 +79,9 @@ export class AuthService {
   async refreshTokens(userid: number, rt: string) {
     const user = await this.userService.getUser(userid);
     if (!user || !user.hashedRt) throw new ForbiddenException('Access Denied');
-    const rtMatches = await bcrypt.compare(rt, user.hashedRt);
+    const rtMatches = await argon.verify(user.hashedRt, rt);
     if (!rtMatches) throw new ForbiddenException('Access Denied');
-    const tokens = await this.getTokens(user.id, user.email);
+    const tokens = await this.getTokens(user.id, user.email, user.role);
     await this.updateRtHash(user.id, tokens.refresh_token);
     return tokens;
   }

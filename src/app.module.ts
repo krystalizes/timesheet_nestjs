@@ -10,6 +10,7 @@ import { dataSourceOptions } from './config/database/ormConfig';
 import { AuthModule } from './module/auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './module/auth/common/guards';
+import { RolesGuard } from './module/auth/common/guards/role.guard';
 
 @Module({
   imports: [
@@ -26,6 +27,10 @@ import { AtGuard } from './module/auth/common/guards';
     {
       provide: APP_GUARD,
       useClass: AtGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

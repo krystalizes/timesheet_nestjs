@@ -9,13 +9,16 @@ import {
 import { AuthService } from './auth.service';
 import { Tokens } from './types/token.type';
 import { AuthDto } from './dto/auth.dto';
-import { AtGuard, RtGuard } from './common/guards';
+import { RtGuard } from './common/guards';
 import { GetCurrentUser, GetCurrentUserId, Public } from './common/decorator';
+import { Roles } from './common/decorator/get-role-user.decorator';
+import { Role } from './common/enum/role.enum';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @HttpCode(HttpStatus.CREATED)
+  @Roles(Role.Admin)
   @Post('create')
   signUp(@Body() signUpDto: AuthDto): Promise<Tokens> {
     return this.authService.signUp(signUpDto);
@@ -26,7 +29,6 @@ export class AuthController {
   signIn(@Body() signInDto: AuthDto): Promise<Tokens> {
     return this.authService.signIn(signInDto);
   }
-  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Post('logout')
   logOut(@GetCurrentUserId() userId: number) {

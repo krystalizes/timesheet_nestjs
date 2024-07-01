@@ -19,7 +19,7 @@ export class AuthDto {
   sex: string;
   phone: string;
   work_time: string;
-  position: string;
+  role: string;
   user_type: string;
   user_level: string;
   @Exclude()
