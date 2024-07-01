@@ -22,7 +22,7 @@ export class AuthService {
           email,
         },
         {
-          secret: 'at-secret',
+          secret: process.env.JWT_SECRET,
           expiresIn: 60 * 15,
         },
       ),
@@ -32,7 +32,7 @@ export class AuthService {
           email,
         },
         {
-          secret: 'rt-secret',
+          secret: process.env.JWT_REFRESH_SECRET,
           expiresIn: 60 * 60 * 24 * 7,
         },
       ),
@@ -63,6 +63,16 @@ export class AuthService {
     await this.updateRtHash(user.id, tokens.refresh_token);
     return tokens;
   }
-  login() {}
-  refresh_token() {}
+  async logOut(userid: number) {
+    await this.userService.updateUser(userid, { hashedRt: null });
+  }
+  async refreshTokens(userid: number, rt: string) {
+    const user = await this.userService.getUser(userid);
+    if (!user || !user.hashedRt) throw new ForbiddenException('Access Denied');
+    const rtMatches = await bcrypt.compare(rt, user.hashedRt);
+    if (!rtMatches) throw new ForbiddenException('Access Denied');
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRtHash(user.id, tokens.refresh_token);
+    return tokens;
+  }
 }

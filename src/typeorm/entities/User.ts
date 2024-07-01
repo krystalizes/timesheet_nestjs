@@ -69,7 +69,7 @@ export class User {
     default: 'User',
   })
   role: string;
-  @Column()
+  @Column({ nullable: true })
   hashedRt: string;
   @CreateDateColumn()
   created_at: Date;

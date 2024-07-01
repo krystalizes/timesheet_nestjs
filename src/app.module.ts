@@ -8,6 +8,8 @@ import { TaskModule } from './module/task/task.module';
 import { TimesheetModule } from './module/timesheet/timesheet.module';
 import { dataSourceOptions } from './config/database/ormConfig';
 import { AuthModule } from './module/auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AtGuard } from './module/auth/common/guards';
 
 @Module({
   imports: [
@@ -19,6 +21,12 @@ import { AuthModule } from './module/auth/auth.module';
     TaskModule,
     TimesheetModule,
     AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AtGuard,
+    },
   ],
 })
 export class AppModule {}
