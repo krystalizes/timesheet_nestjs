@@ -11,6 +11,8 @@ import {
 import { Client } from './Client';
 import { Task } from './Task';
 import { User_project } from './User_project';
+import { ProjectStatus } from 'src/module/auth/common/enum/project-status.enum';
+import { ProjectType } from 'src/module/auth/common/enum/project-type.enum';
 @Entity()
 export class Project {
   @PrimaryGeneratedColumn()
@@ -29,12 +31,12 @@ export class Project {
   description: string;
   @Column({
     type: 'enum',
-    enum: ['Training', 'Company Activities', 'Production'],
+    enum: ProjectType,
   })
   type: string;
   @Column({
     type: 'enum',
-    enum: ['Inactive', 'Active'],
+    enum: ProjectStatus,
     default: 'Active',
   })
   status: string;

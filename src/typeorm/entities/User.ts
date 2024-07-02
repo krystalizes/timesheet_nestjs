@@ -9,6 +9,10 @@ import {
 } from 'typeorm';
 import { Branch } from './Branch';
 import { User_project } from './User_project';
+import { RoleUser } from 'src/module/auth/common/enum/role-user.enum';
+import { UserType } from 'src/module/auth/common/enum/uesr-type.enum';
+import { UserLevel } from 'src/module/auth/common/enum/user-level.enum';
+import { UserSex } from 'src/module/auth/common/enum/user-sex.enum';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -33,35 +37,27 @@ export class User {
   leave_day: number;
   @Column({
     type: 'enum',
-    enum: ['Male', 'Female'],
+    enum: UserSex,
   })
   sex: string;
   @Column({ unique: true })
   phone: string;
-  @Column()
+  @Column({ default: '08:30-17:30' })
   work_time: string;
   @Column({
     type: 'enum',
-    enum: ['Dev', 'HR', 'PM', 'CEO', 'Admin'],
+    enum: RoleUser,
     nullable: true,
   })
   role: string;
   @Column({
     type: 'enum',
-    enum: ['Staff', 'Intern', 'Colaborator'],
+    enum: UserType,
   })
   user_type: string;
   @Column({
     type: 'enum',
-    enum: [
-      'Intern_0',
-      'Intern_1',
-      'Intern_2',
-      'Intern_3',
-      'Fresher',
-      'Junior',
-      'Senior',
-    ],
+    enum: UserLevel,
   })
   user_level: string;
   @Column({ nullable: true })

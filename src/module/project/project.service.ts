@@ -10,6 +10,8 @@ import { TaskService } from '../task/task.service';
 import { CreateTaskDto } from '../task/dto/create-task.dto';
 import { UserProjectService } from '../user_project/user_project.service';
 import { TimesheetService } from '../timesheet/timesheet.service';
+import { FilterProjectDto } from './dto/filter-project.dto';
+import { SearchProjectDto } from './dto/search-project.dto';
 
 @Injectable()
 export class ProjectService {
@@ -31,7 +33,7 @@ export class ProjectService {
       await transactionalEntityManager.save(project);
       if (user_id && user_id.length > 0) {
         const userProjectPromises = user_id.map(async (userId, index) => {
-          const user = await this.userService.getUser(userId);
+          const user = await this.userService.getUser(userId, true);
           const createUserProjectDto: CreateUserProjectDto = {
             role: role[index],
             user: user,
@@ -90,7 +92,8 @@ export class ProjectService {
     });
   }
   // tim kiếm theo tên project hoặc client
-  searchByClientorName(input: string) {
+  searchByClientorName(searchDto: SearchProjectDto) {
+    const { input } = searchDto;
     return this.ProjectRepository.find({
       where: [
         { name: ILike(`%${input}%`) },
@@ -100,7 +103,8 @@ export class ProjectService {
     });
   }
   // flter project theo status
-  filterProjects(status: string) {
+  filterProjects(filterDto: FilterProjectDto) {
+    const { status } = filterDto;
     return this.ProjectRepository.find({
       where: { status },
       relations: ['client'],

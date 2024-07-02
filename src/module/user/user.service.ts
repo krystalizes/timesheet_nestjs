@@ -15,11 +15,18 @@ export class UserService {
     return this.UserRepository.find({ relations: ['branch'] });
   }
   // get 1 user
-  getUser(id: number) {
-    return this.UserRepository.findOne({
+  async getUser(id: number, includePassword?: boolean) {
+    const user = await this.UserRepository.findOne({
       where: { id },
       relations: ['branch'],
     });
+    if (includePassword) {
+      return user;
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    }
   }
   async findOne(email: string) {
     return this.UserRepository.findOne({

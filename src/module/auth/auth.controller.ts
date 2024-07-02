@@ -13,6 +13,7 @@ import { RtGuard } from './common/guards';
 import { GetCurrentUser, GetCurrentUserId, Public } from './common/decorator';
 import { Roles } from './common/decorator/get-role-user.decorator';
 import { Role } from './common/enum/role.enum';
+import { updateUserDto } from '../user/dto/updateUser.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -26,7 +27,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() signInDto: AuthDto): Promise<Tokens> {
+  signIn(@Body() signInDto: updateUserDto): Promise<Tokens> {
     return this.authService.signIn(signInDto);
   }
   @HttpCode(HttpStatus.OK)
