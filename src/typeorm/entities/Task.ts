@@ -10,6 +10,8 @@ import {
 } from 'typeorm';
 import { Project } from './Project';
 import { Timesheet } from './Timesheet';
+import { ProjectStatus } from 'src/module/auth/common/enum/project-status.enum';
+import { TaskType } from 'src/module/auth/common/enum/task-type.enum';
 
 @Entity()
 export class Task {
@@ -25,13 +27,13 @@ export class Task {
   description: string;
   @Column({
     type: 'enum',
-    enum: ['Common Tasks', 'Other Tasks'],
-    default: 'Other Tasks',
+    enum: TaskType,
+    default: TaskType.Other_Tasks,
   })
   type: string;
   @Column({
     type: 'enum',
-    enum: ['Active', 'Inactive'],
+    enum: ProjectStatus,
   })
   status: string;
   @ManyToOne(() => Project, (project) => project.tasks)

@@ -37,7 +37,7 @@ export class Project {
   @Column({
     type: 'enum',
     enum: ProjectStatus,
-    default: 'Active',
+    default: ProjectStatus.Active,
   })
   status: string;
   @ManyToOne(() => Client, (client) => client.projects)

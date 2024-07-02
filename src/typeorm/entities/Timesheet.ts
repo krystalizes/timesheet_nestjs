@@ -8,6 +8,8 @@ import {
 } from 'typeorm';
 import { Task } from './Task';
 import { User_project } from './User_project';
+import { TimesheetWorkType } from 'src/module/auth/common/enum/timesheet-work-type.enum';
+import { TimesheetStatus } from 'src/module/auth/common/enum/timesheet-status.enum';
 @Entity()
 export class Timesheet {
   @PrimaryGeneratedColumn()
@@ -22,12 +24,12 @@ export class Timesheet {
   work_time: number;
   @Column({
     type: 'enum',
-    enum: ['Normal Working Hours', 'Overtime'],
+    enum: TimesheetWorkType,
   })
   work_type: string;
   @Column({
     type: 'enum',
-    enum: ['New', 'Pending', 'Approved', 'Rejected'],
+    enum: TimesheetStatus,
   })
   status: string;
   @ManyToOne(() => User_project, (user_project) => user_project.timesheets)

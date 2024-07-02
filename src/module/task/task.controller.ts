@@ -12,6 +12,8 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Roles } from '../auth/common/decorator/get-role-user.decorator';
 import { Role } from '../auth/common/enum/role.enum';
+import { FilterProjectDto } from '../project/dto/filter-project.dto';
+import { SearchProjectDto } from '../project/dto/search-project.dto';
 
 @Controller('task')
 export class TaskController {
@@ -26,14 +28,14 @@ export class TaskController {
     return this.taskService.findTaskInPrj(id);
   }
   @Roles(Role.Admin)
-  @Get('search/:input')
-  searchByName(@Param('input') input: string) {
-    return this.taskService.searchByName(input);
+  @Get('/search')
+  searchByName(@Body() searchDto: SearchProjectDto) {
+    return this.taskService.searchByName(searchDto);
   }
   @Roles(Role.Admin)
-  @Get('/filter/:status')
-  filterTasks(@Param('status') status: string) {
-    return this.taskService.filterTasks(status);
+  @Get('/filter')
+  filterTasks(@Body() filterDto: FilterProjectDto) {
+    return this.taskService.filterTasks(filterDto);
   }
   @Roles(Role.Admin)
   @Get(':id')

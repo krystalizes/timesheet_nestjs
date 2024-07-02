@@ -4,6 +4,8 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from 'src/typeorm/entities/Task';
 import { EntityManager, ILike, Repository } from 'typeorm';
+import { FilterProjectDto } from '../project/dto/filter-project.dto';
+import { SearchProjectDto } from '../project/dto/search-project.dto';
 
 @Injectable()
 export class TaskService {
@@ -24,7 +26,7 @@ export class TaskService {
   // tìm các task trong 1 project
   findTaskInPrj(id: number) {
     return this.TaskRepository.find({
-      where: { project: { id: id } },
+      where: { project: { id } },
     });
   }
   // tìm 1 task
@@ -36,14 +38,16 @@ export class TaskService {
     });
   }
   // tìm task theo status
-  filterTasks(status: string) {
+  filterTasks(dto: FilterProjectDto) {
+    const { status } = dto;
     return this.TaskRepository.find({
       where: { status },
       relations: ['project'],
     });
   }
   // tìm the theo tên task
-  searchByName(input: string) {
+  searchByName(dto: SearchProjectDto) {
+    const { input } = dto;
     return this.TaskRepository.find({
       where: [{ name: ILike(`%${input}%`) }],
       relations: ['project'],

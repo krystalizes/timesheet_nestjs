@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { updateUserDto } from './dto/updateUser.dto';
 import { AuthDto } from '../auth/dto/auth.dto';
+import { EmailUserDto } from './dto/email-user.dto';
 
 @Injectable()
 export class UserService {
@@ -20,15 +21,13 @@ export class UserService {
       where: { id },
       relations: ['branch'],
     });
-    if (includePassword) {
-      return user;
-    } else {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...userWithoutPassword } = user;
-      return userWithoutPassword;
+    if (!includePassword) {
+      delete user.password;
     }
+    return user;
   }
-  async findOne(email: string) {
+  async findOne(emailUserDto: EmailUserDto) {
+    const { email } = emailUserDto;
     return this.UserRepository.findOne({
       where: { email },
       relations: ['branch'],

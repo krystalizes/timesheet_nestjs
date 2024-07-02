@@ -12,6 +12,7 @@ import { UserProjectService } from '../user_project/user_project.service';
 import { TimesheetService } from '../timesheet/timesheet.service';
 import { FilterProjectDto } from './dto/filter-project.dto';
 import { SearchProjectDto } from './dto/search-project.dto';
+import { IdDto } from '../auth/dto/id.dto';
 
 @Injectable()
 export class ProjectService {
@@ -78,14 +79,16 @@ export class ProjectService {
     return this.ProjectRepository.find({ relations: ['client'] });
   }
   // get 1 project
-  findOne(id: number) {
+  findOne(dto: IdDto) {
+    const { id } = dto;
     return this.ProjectRepository.findOne({
       where: { id },
       relations: ['client'],
     });
   }
   // lấy tất cả project của 1 client
-  findPrjOfClient(id: number) {
+  findPrjOfClient(dto: IdDto) {
+    const { id } = dto;
     return this.ProjectRepository.find({
       where: [{ client: { id } }],
       relations: ['client'],
@@ -111,12 +114,14 @@ export class ProjectService {
     });
   }
   // update
-  async update(id: number, updateProjectDto: UpdateProjectDto) {
+  async update(dto: IdDto, updateProjectDto: UpdateProjectDto) {
+    const { id } = dto;
     await this.ProjectRepository.update(id, updateProjectDto);
     return this.ProjectRepository.findOneByOrFail({ id });
   }
   // soft delete project khi không có timesheet logged
-  async remove(id: number) {
+  async remove(dto: IdDto) {
+    const { id } = dto;
     const timesheets = await this.timesheetService.checkProject(id);
     if (timesheets) {
       throw new BadRequestException(
@@ -126,7 +131,8 @@ export class ProjectService {
     return this.ProjectRepository.softDelete(id);
   }
   //restore
-  restore(id: number) {
+  restore(dto: IdDto) {
+    const { id } = dto;
     return this.ProjectRepository.restore(id);
   }
 }

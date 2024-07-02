@@ -66,7 +66,8 @@ export class AuthService {
     await this.userService.updateUser(userId, { hashedRt });
   }
   async signIn(dto: updateUserDto): Promise<Tokens> {
-    const user = await this.userService.findOne(dto.email);
+    const email = dto.email;
+    const user = await this.userService.findOne({ email });
     if (!user) throw new ForbiddenException('Access Denied');
     const passwordMatches = await argon.verify(user.password, dto.password);
     if (!passwordMatches) throw new ForbiddenException('Access Denied');
@@ -77,7 +78,7 @@ export class AuthService {
   async logOut(userid: number) {
     await this.userService.updateUser(userid, { hashedRt: null });
   }
-  async refreshTokens(userid: number, rt: string) {
+  async refreshTokens(userid: number, rt: string): Promise<Tokens> {
     const user = await this.userService.getUser(userid);
     if (!user || !user.hashedRt) throw new ForbiddenException('Access Denied');
     const rtMatches = await argon.verify(user.hashedRt, rt);
