@@ -12,7 +12,9 @@ import { CreateTimesheetDto } from './dto/create-timesheet.dto';
 import { UpdateTimesheetDto } from './dto/update-timesheet.dto';
 import { Roles } from '../auth/common/decorator/get-role-user.decorator';
 import { Role } from '../auth/common/enum/role.enum';
-
+import { ApiTags } from '@nestjs/swagger';
+import { GetCurrentUserId } from '../auth/common/decorator/get-current-user-id.decorator';
+@ApiTags('Timesheet')
 @Controller('timesheet')
 export class TimesheetController {
   constructor(private readonly timesheetService: TimesheetService) {}
@@ -72,13 +74,13 @@ export class TimesheetController {
     return this.timesheetService.update(id, updateTimesheetDto);
   }
 
-  @Patch('/submit/:user_id/:start/:end')
+  @Patch('/submit/:start/:end')
   submit(
-    @Param('user_id') user_id: number,
+    @GetCurrentUserId() id: number,
     @Param('start') start: Date,
     @Param('end') end: Date,
   ) {
-    return this.timesheetService.submit(user_id, start, end);
+    return this.timesheetService.submit(id, start, end);
   }
 
   @Delete('/:id')

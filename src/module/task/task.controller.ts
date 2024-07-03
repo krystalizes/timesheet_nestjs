@@ -14,7 +14,8 @@ import { Roles } from '../auth/common/decorator/get-role-user.decorator';
 import { Role } from '../auth/common/enum/role.enum';
 import { FilterProjectDto } from '../project/dto/filter-project.dto';
 import { SearchProjectDto } from '../project/dto/search-project.dto';
-
+import { ApiTags } from '@nestjs/swagger';
+@ApiTags('Task')
 @Controller('task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}

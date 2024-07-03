@@ -1,10 +1,11 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, Res } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { Tokens } from './types/token.type';
 import { AuthDto } from './dto/auth.dto';
 import { updateUserDto } from '../user/dto/updateUser.dto';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -49,7 +50,7 @@ export class AuthService {
       refresh_token: rt,
     };
   }
-  async signUp(dto: AuthDto): Promise<Tokens> {
+  async signUp(dto: AuthDto, @Res({ passthrough: true }) res: Response) {
     const hash = await this.hashData(dto.password);
     dto.password = hash;
     const newUser = await this.userService.createUser(dto);
@@ -59,13 +60,21 @@ export class AuthService {
       newUser.role,
     );
     await this.updateRtHash(newUser.id, tokens.refresh_token);
-    return tokens;
+    res.cookie('access_token', tokens.access_token, {
+      httpOnly: true,
+      maxAge: 15 * 60 * 1000,
+    });
+    res.cookie('refresh_token', tokens.refresh_token, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    return res.json(tokens);
   }
   async updateRtHash(userId: number, rt: string) {
     const hashedRt = await this.hashData(rt);
     await this.userService.updateUser(userId, { hashedRt });
   }
-  async signIn(dto: updateUserDto): Promise<Tokens> {
+  async signIn(dto: updateUserDto, @Res({ passthrough: true }) res: Response) {
     const email = dto.email;
     const user = await this.userService.findOne({ email });
     if (!user) throw new ForbiddenException('Access Denied');
@@ -73,18 +82,41 @@ export class AuthService {
     if (!passwordMatches) throw new ForbiddenException('Access Denied');
     const tokens = await this.getTokens(user.id, user.email, user.role);
     await this.updateRtHash(user.id, tokens.refresh_token);
-    return tokens;
+    res.cookie('access_token', tokens.access_token, {
+      httpOnly: true,
+      maxAge: 15 * 60 * 1000,
+    });
+    res.cookie('refresh_token', tokens.refresh_token, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    return res.json(tokens);
   }
-  async logOut(userid: number) {
+  async logOut(userid: number, @Res({ passthrough: true }) res: Response) {
     await this.userService.updateUser(userid, { hashedRt: null });
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+    return res.json('Logout successfully');
   }
-  async refreshTokens(userid: number, rt: string): Promise<Tokens> {
+  async refreshTokens(
+    userid: number,
+    rt: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const user = await this.userService.getUser(userid);
     if (!user || !user.hashedRt) throw new ForbiddenException('Access Denied');
     const rtMatches = await argon.verify(user.hashedRt, rt);
     if (!rtMatches) throw new ForbiddenException('Access Denied');
     const tokens = await this.getTokens(user.id, user.email, user.role);
     await this.updateRtHash(user.id, tokens.refresh_token);
-    return tokens;
+    res.cookie('access_token', tokens.access_token, {
+      httpOnly: true,
+      maxAge: 15 * 60 * 1000,
+    });
+    res.cookie('refresh_token', tokens.refresh_token, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    return res.json(tokens);
   }
 }
