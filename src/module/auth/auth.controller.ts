@@ -16,6 +16,7 @@ import { Role } from './common/enum/role.enum';
 import { updateUserDto } from '../user/dto/updateUser.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
