@@ -14,7 +14,8 @@ import { GetCurrentUser, GetCurrentUserId, Public } from './common/decorator';
 import { Roles } from './common/decorator/get-role-user.decorator';
 import { Role } from './common/enum/role.enum';
 import { updateUserDto } from '../user/dto/updateUser.dto';
-
+import { ApiTags } from '@nestjs/swagger';
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

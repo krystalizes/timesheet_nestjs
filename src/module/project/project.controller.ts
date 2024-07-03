@@ -14,7 +14,8 @@ import { Roles } from '../auth/common/decorator/get-role-user.decorator';
 import { Role } from '../auth/common/enum/role.enum';
 import { FilterProjectDto } from './dto/filter-project.dto';
 import { SearchProjectDto } from './dto/search-project.dto';
-
+import { ApiTags } from '@nestjs/swagger';
+@ApiTags('Project')
 @Controller('project')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
