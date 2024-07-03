@@ -13,9 +13,6 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
   ) {}
-  hashData(data: string) {
-    return argon.hash(data);
-  }
   async getTokens(
     userId: number,
     email: string,
@@ -30,7 +27,7 @@ export class AuthService {
         },
         {
           secret: process.env.JWT_SECRET,
-          expiresIn: 60 * 15,
+          expiresIn: 10,
         },
       ),
       this.jwtService.signAsync(
@@ -50,28 +47,14 @@ export class AuthService {
       refresh_token: rt,
     };
   }
-  async signUp(dto: AuthDto, @Res({ passthrough: true }) res: Response) {
-    const hash = await this.hashData(dto.password);
+  async signUp(dto: AuthDto) {
+    const hash = await argon.hash(dto.password);
     dto.password = hash;
     const newUser = await this.userService.createUser(dto);
-    const tokens = await this.getTokens(
-      newUser.id,
-      newUser.email,
-      newUser.role,
-    );
-    await this.updateRtHash(newUser.id, tokens.refresh_token);
-    res.cookie('access_token', tokens.access_token, {
-      httpOnly: true,
-      maxAge: 15 * 60 * 1000,
-    });
-    res.cookie('refresh_token', tokens.refresh_token, {
-      httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    return res.json(tokens);
+    return newUser;
   }
   async updateRtHash(userId: number, rt: string) {
-    const hashedRt = await this.hashData(rt);
+    const hashedRt = await argon.hash(rt);
     await this.userService.updateUser(userId, { hashedRt });
   }
   async signIn(dto: updateUserDto, @Res({ passthrough: true }) res: Response) {
@@ -84,11 +67,9 @@ export class AuthService {
     await this.updateRtHash(user.id, tokens.refresh_token);
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
-      maxAge: 15 * 60 * 1000,
     });
     res.cookie('refresh_token', tokens.refresh_token, {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return res.json(tokens);
   }
@@ -108,15 +89,9 @@ export class AuthService {
     const rtMatches = await argon.verify(user.hashedRt, rt);
     if (!rtMatches) throw new ForbiddenException('Access Denied');
     const tokens = await this.getTokens(user.id, user.email, user.role);
-    await this.updateRtHash(user.id, tokens.refresh_token);
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
-      maxAge: 15 * 60 * 1000,
     });
-    res.cookie('refresh_token', tokens.refresh_token, {
-      httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    return res.json(tokens);
+    return res.json(tokens.access_token);
   }
 }

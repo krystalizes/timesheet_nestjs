@@ -24,8 +24,8 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Roles(Role.Admin)
   @Post('create')
-  signUp(@Body() signUpDto: AuthDto, @Res() res: Response) {
-    return this.authService.signUp(signUpDto, res);
+  signUp(@Body() signUpDto: AuthDto) {
+    return this.authService.signUp(signUpDto);
   }
   @Public()
   @HttpCode(HttpStatus.OK)
