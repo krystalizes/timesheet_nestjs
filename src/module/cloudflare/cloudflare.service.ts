@@ -4,6 +4,7 @@ import {
   PutObjectCommand,
   PutObjectCommandInput,
   PutObjectCommandOutput,
+  DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 @Injectable()
 export class CloudflareService {
@@ -40,6 +41,20 @@ export class CloudflareService {
       throw new Error('Img not saved');
     } catch (err) {
       this.logger.error('cannot save file', err);
+      throw err;
+    }
+  }
+  async deleteFile(key: string) {
+    const bucket = process.env.CLOUDFLARE_BUCKET;
+    const deleteParams = {
+      Bucket: bucket,
+      Key: key,
+    };
+    try {
+      await this.cloudflare.send(new DeleteObjectCommand(deleteParams));
+      this.logger.log(`Deleted file ${key}`);
+    } catch (err) {
+      this.logger.error(`Failed to delete file ${key}`, err);
       throw err;
     }
   }

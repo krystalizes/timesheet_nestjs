@@ -44,7 +44,12 @@ export class UserService {
     return updatedUser;
   }
   async addImg(file: Express.Multer.File, id: number) {
+    const user = await this.getUser(id);
     const key = `${file.originalname}${Date.now()}`;
+    if (user.image) {
+      const imageKey = user.image.split('/').pop();
+      await this.cloudflareService.deleteFile(imageKey);
+    }
     const image = await this.cloudflareService.uploadFile(file, key);
     return await this.updateUser(id, { image });
   }
