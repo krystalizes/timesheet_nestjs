@@ -48,6 +48,8 @@ export class AuthDto {
   @IsNotEmpty()
   @Matches(/^\d{10,11}$/, { message: 'Phone number must have 10 or 11 digit' })
   phone: string;
+  @Exclude()
+  image: string;
   @IsString()
   work_time: string;
   @IsNotEmpty()

@@ -22,11 +22,11 @@ export class ClientController {
   @Roles(Role.Admin)
   @Get('/:id')
   findOne(@Param('id') id: number) {
-    return this.clientService.findOne({ id });
+    return this.clientService.findOne(id);
   }
   @Roles(Role.Admin)
   @Patch('/:id')
   update(@Param('id') id: number, @Body() updateClientDto: UpdateClientDto) {
-    return this.clientService.update({ id }, updateClientDto);
+    return this.clientService.update(id, updateClientDto);
   }
 }

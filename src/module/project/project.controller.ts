@@ -44,28 +44,28 @@ export class ProjectController {
   @Roles(Role.Admin, Role.PM)
   @Get('/:id')
   findOne(@Param('id') id: number) {
-    return this.projectService.findOne({ id });
+    return this.projectService.findOne(id);
   }
 
   @Roles(Role.Admin)
   @Get('/client/:id')
   findPrjOfClient(@Param('id') id: number) {
-    return this.projectService.findPrjOfClient({ id });
+    return this.projectService.findPrjOfClient(id);
   }
 
   @Roles(Role.Admin)
   @Patch(':id')
   update(@Param('id') id: number, @Body() updateProjectDto: UpdateProjectDto) {
-    return this.projectService.update({ id }, updateProjectDto);
+    return this.projectService.update(id, updateProjectDto);
   }
   @Roles(Role.Admin)
   @Delete('/:id')
   remove(@Param('id') id: number) {
-    return this.projectService.remove({ id });
+    return this.projectService.remove(id);
   }
   @Roles(Role.Admin)
   @Patch('/restore/:id')
   restore(@Param('id') id: number) {
-    return this.projectService.restore({ id });
+    return this.projectService.restore(id);
   }
 }

@@ -11,6 +11,7 @@ import { AuthModule } from './module/auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './module/auth/common/guards';
 import { RolesGuard } from './module/auth/common/guards/role.guard';
+import { CloudflareModule } from './module/cloudflare/cloudflare.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { RolesGuard } from './module/auth/common/guards/role.guard';
     TaskModule,
     TimesheetModule,
     AuthModule,
+    CloudflareModule,
   ],
   providers: [
     {
