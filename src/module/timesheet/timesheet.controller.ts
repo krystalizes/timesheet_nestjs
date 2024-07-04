@@ -6,6 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { TimesheetService } from './timesheet.service';
 import { CreateTimesheetDto } from './dto/create-timesheet.dto';
@@ -14,6 +17,8 @@ import { Roles } from '../auth/common/decorator/get-role-user.decorator';
 import { Role } from '../auth/common/enum/role.enum';
 import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentUserId } from '../auth/common/decorator/get-current-user-id.decorator';
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { Timesheet } from 'src/typeorm/entities/Timesheet';
 @ApiTags('Timesheet')
 @Controller('timesheet')
 export class TimesheetController {
@@ -24,15 +29,26 @@ export class TimesheetController {
     return this.timesheetService.create(createTimesheetDto);
   }
 
+  @Roles(Role.PM)
+  @Get('/pending')
+  async getTimesheetPend(
+    @GetCurrentUserId() id: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ): Promise<Pagination<Timesheet>> {
+    limit = limit > 100 ? 100 : limit;
+    return this.timesheetService.getTimesheetPend(id, {
+      page,
+      limit,
+      route: `/timesheet/pending/${id}`,
+    });
+  }
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.timesheetService.findOne(id);
   }
-  @Roles(Role.PM)
-  @Get('/pending/:id')
-  getTimesheetPend(@Param('id') id: number) {
-    return this.timesheetService.getTimesheetPend(id);
-  }
+
   @Roles(Role.PM)
   @Get('/project/:prj_id')
   findTimesheetInProject(@Param('prj_id') id: number) {

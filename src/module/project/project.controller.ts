@@ -6,6 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  DefaultValuePipe,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -15,6 +18,8 @@ import { Role } from '../auth/common/enum/role.enum';
 import { FilterProjectDto } from './dto/filter-project.dto';
 import { SearchProjectDto } from './dto/search-project.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { Project } from 'src/typeorm/entities/Project';
 @ApiTags('Project')
 @Controller('project')
 export class ProjectController {
@@ -26,20 +31,44 @@ export class ProjectController {
   }
   @Roles(Role.Admin)
   @Get('/')
-  findAll() {
-    return this.projectService.findAll();
+  async findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ): Promise<Pagination<Project>> {
+    limit = limit > 100 ? 100 : limit;
+    return this.projectService.findAll({
+      page,
+      limit,
+      route: '/project/',
+    });
   }
   @Roles(Role.Admin)
   @Get('/filter')
-  filterProjects(@Body() filterDto: FilterProjectDto) {
-    console.log(1);
-    return this.projectService.filterProjects(filterDto);
+  async filterProjects(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Body() filterDto: FilterProjectDto,
+  ): Promise<Pagination<Project>> {
+    limit = limit > 100 ? 100 : limit;
+    return this.projectService.filterProjects(filterDto, {
+      page,
+      limit,
+      route: '/project/filter',
+    });
   }
   @Roles(Role.Admin)
   @Get('/search')
-  searchByClientorName(@Body() searchDto: SearchProjectDto) {
-    console.log(1);
-    return this.projectService.searchByClientorName(searchDto);
+  async searchByClientorName(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Body() searchDto: SearchProjectDto,
+  ): Promise<Pagination<Project>> {
+    limit = limit > 100 ? 100 : limit;
+    return this.projectService.searchByClientorName(searchDto, {
+      page,
+      limit,
+      route: '/project/search',
+    });
   }
   @Roles(Role.Admin, Role.PM)
   @Get('/:id')
@@ -49,8 +78,17 @@ export class ProjectController {
 
   @Roles(Role.Admin)
   @Get('/client/:id')
-  findPrjOfClient(@Param('id') id: number) {
-    return this.projectService.findPrjOfClient(id);
+  async findPrjOfClient(
+    @Param('id') id: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ): Promise<Pagination<Project>> {
+    limit = limit > 100 ? 100 : limit;
+    return this.projectService.findPrjOfClient(id, {
+      page,
+      limit,
+      route: `/project/client/${id}`,
+    });
   }
 
   @Roles(Role.Admin)

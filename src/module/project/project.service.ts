@@ -3,7 +3,7 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Project } from 'src/typeorm/entities/Project';
-import { EntityManager, ILike, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { CreateUserProjectDto } from 'src/module/user_project/dto/create-user_project.dto';
 import { UserService } from 'src/module/user/user.service';
 import { TaskService } from '../task/task.service';
@@ -12,6 +12,11 @@ import { UserProjectService } from '../user_project/user_project.service';
 import { TimesheetService } from '../timesheet/timesheet.service';
 import { FilterProjectDto } from './dto/filter-project.dto';
 import { SearchProjectDto } from './dto/search-project.dto';
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class ProjectService {
@@ -71,8 +76,11 @@ export class ProjectService {
       return project;
     });
   }
-  findAll() {
-    return this.ProjectRepository.find({ relations: ['client'] });
+  async findAll(options: IPaginationOptions): Promise<Pagination<Project>> {
+    const queryBuilder = this.ProjectRepository.createQueryBuilder(
+      'project',
+    ).leftJoinAndSelect('project.client', 'client');
+    return paginate<Project>(queryBuilder, options);
   }
   findOne(id: number) {
     return this.ProjectRepository.findOne({
@@ -80,28 +88,36 @@ export class ProjectService {
       relations: ['client'],
     });
   }
-  findPrjOfClient(id: number) {
-    return this.ProjectRepository.find({
-      where: [{ client: { id } }],
-      relations: ['client'],
-    });
+  async findPrjOfClient(
+    id: number,
+    options: IPaginationOptions,
+  ): Promise<Pagination<Project>> {
+    const queryBuilder = this.ProjectRepository.createQueryBuilder('project')
+      .leftJoinAndSelect('project.client', 'client')
+      .where('project.client.id = :id', { id });
+    return paginate<Project>(queryBuilder, options);
   }
-  searchByClientorName(searchDto: SearchProjectDto) {
+
+  async searchByClientorName(
+    searchDto: SearchProjectDto,
+    options: IPaginationOptions,
+  ): Promise<Pagination<Project>> {
     const { input } = searchDto;
-    return this.ProjectRepository.find({
-      where: [
-        { name: ILike(`%${input}%`) },
-        { client: { name: ILike(`%${input}%`) } },
-      ],
-      relations: ['client'],
-    });
+    const queryBuilder = this.ProjectRepository.createQueryBuilder('project')
+      .leftJoinAndSelect('project.client', 'client')
+      .where('project.name LIKE :input', { input: `%${input}%` })
+      .orWhere('client.name LIKE :input', { input: `%${input}%` });
+    return paginate<Project>(queryBuilder, options);
   }
-  filterProjects(filterDto: FilterProjectDto) {
+  async filterProjects(
+    filterDto: FilterProjectDto,
+    options: IPaginationOptions,
+  ): Promise<Pagination<Project>> {
     const { status } = filterDto;
-    return this.ProjectRepository.find({
-      where: { status },
-      relations: ['client'],
-    });
+    const queryBuilder = this.ProjectRepository.createQueryBuilder('project')
+      .leftJoinAndSelect('project.client', 'client')
+      .where('project.status = :status', { status });
+    return paginate<Project>(queryBuilder, options);
   }
   async update(id: number, updateProjectDto: UpdateProjectDto) {
     const prj = await this.findOne(id);

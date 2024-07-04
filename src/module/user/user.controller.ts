@@ -31,10 +31,10 @@ export class UserController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
   ): Promise<Pagination<User>> {
     limit = limit > 100 ? 100 : limit;
-    return this.userService.paginate({
+    return this.userService.getAllUser({
       page,
       limit,
-      route: 'http://localhost:3000/user/',
+      route: `/user/`,
     });
   }
 

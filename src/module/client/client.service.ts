@@ -4,24 +4,25 @@ import { UpdateClientDto } from './dto/update-client.dto';
 import { Client } from 'src/typeorm/entities/Client';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
 @Injectable()
 export class ClientService {
   constructor(
     @InjectRepository(Client) private ClientRepository: Repository<Client>,
   ) {}
-  // tạo client
   create(createClientDto: CreateClientDto) {
     return this.ClientRepository.save(createClientDto);
   }
-  // get tất cả client
-  findAll() {
-    return this.ClientRepository.find();
+  async findAll(options: IPaginationOptions): Promise<Pagination<Client>> {
+    return paginate<Client>(this.ClientRepository, options);
   }
-  // get 1 client
   findOne(id: number) {
     return this.ClientRepository.findOneBy({ id });
   }
-  // update 1 client
   async update(id: number, updateClientDto: UpdateClientDto) {
     const client = await this.findOne(id);
     return await this.ClientRepository.save(

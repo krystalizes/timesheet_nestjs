@@ -18,7 +18,7 @@ export class UserService {
     @InjectRepository(User) private UserRepository: Repository<User>,
     private cloudflareService: CloudflareService,
   ) {}
-  async paginate(options: IPaginationOptions): Promise<Pagination<User>> {
+  async getAllUser(options: IPaginationOptions): Promise<Pagination<User>> {
     return paginate<User>(this.UserRepository, options, {
       relations: ['branch'],
     });
