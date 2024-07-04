@@ -39,7 +39,10 @@ export class UserService {
   }
   // update user
   async updateUser(id: number, updateUserDto: updateUserDto) {
-    await this.UserRepository.update(id, updateUserDto);
-    return this.UserRepository.findOneByOrFail({ id });
+    const user = await this.getUser(id);
+    const updatedUser = await this.UserRepository.save(
+      Object.assign(user, updateUserDto),
+    );
+    return updatedUser;
   }
 }

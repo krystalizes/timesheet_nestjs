@@ -44,10 +44,8 @@ export class UserProjectService {
     });
     return userProjects.filter((up) => up.project.status !== 'Inactive');
   }
-  // trả về role trong project của user
   async findRoleUser(prj_id: number, user_id: number) {
-    return await this.UserProjectRepository.find({
-      select: ['role'],
+    return await this.UserProjectRepository.findOne({
       where: {
         user: { id: user_id },
         project: { id: prj_id },
@@ -60,14 +58,10 @@ export class UserProjectService {
     user_id: number,
     updateUserProjectDto: UpdateUserProjectDto,
   ) {
-    await this.UserProjectRepository.update(
-      { user: { id: user_id }, project: { id: prj_id } },
-      updateUserProjectDto,
+    const user_project = await this.findRoleUser(prj_id, user_id);
+    return await this.UserProjectRepository.save(
+      Object.assign(user_project, updateUserProjectDto),
     );
-    return this.UserProjectRepository.findOneByOrFail({
-      user: { id: user_id },
-      project: { id: prj_id },
-    });
   }
   // tìm các project mà user là Manager
   async findProjectIsManager(id: number) {

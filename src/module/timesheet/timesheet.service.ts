@@ -19,7 +19,7 @@ export class TimesheetService {
   }
   // get 1 timesheet theo id
   findOne(id: number) {
-    return this.TimesheetRepository.find({
+    return this.TimesheetRepository.findOne({
       where: { id },
       relations: ['user_project', 'task', 'user_project.project'],
     });
@@ -138,8 +138,10 @@ export class TimesheetService {
   }
   // update timesheet( có thể thêm ràng buộc chỉ có thể sửa nếu là pending hoặc new(đã có ở frontend))
   async update(id: number, updateTimesheetDto: UpdateTimesheetDto) {
-    await this.TimesheetRepository.update(id, updateTimesheetDto);
-    return this.TimesheetRepository.findOneByOrFail({ id });
+    const timesheet = await this.findOne(id);
+    return await this.TimesheetRepository.save(
+      Object.assign(timesheet, updateTimesheetDto),
+    );
   }
   // force delete timesheet
   delete(id: number) {

@@ -55,8 +55,8 @@ export class TaskService {
   }
   // update
   async update(id: number, updateTaskDto: UpdateTaskDto) {
-    await this.TaskRepository.update(id, updateTaskDto);
-    return this.TaskRepository.findOneByOrFail({ id });
+    const task = await this.findOne(id);
+    return await this.TaskRepository.save(Object.assign(task, updateTaskDto));
   }
   // force delete
   delete(id: number) {
