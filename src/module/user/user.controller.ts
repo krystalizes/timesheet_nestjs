@@ -2,10 +2,13 @@ import { UserService } from './user.service';
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -15,14 +18,24 @@ import { Role } from '../auth/common/enum/role.enum';
 import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentUserId } from '../auth/common/decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { User } from 'src/typeorm/entities/User';
 @ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
   @Roles(Role.Admin)
   @Get('/')
-  getAllUser() {
-    return this.userService.getAllUser();
+  async getAllUser(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+  ): Promise<Pagination<User>> {
+    limit = limit > 100 ? 100 : limit;
+    return this.userService.paginate({
+      page,
+      limit,
+      route: 'http://localhost:3000/user/',
+    });
   }
 
   @Get('/:id')

@@ -6,6 +6,11 @@ import { Repository } from 'typeorm';
 import { updateUserDto } from './dto/updateUser.dto';
 import { AuthDto } from '../auth/dto/auth.dto';
 import { EmailUserDto } from './dto/email-user.dto';
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class UserService {
@@ -13,8 +18,10 @@ export class UserService {
     @InjectRepository(User) private UserRepository: Repository<User>,
     private cloudflareService: CloudflareService,
   ) {}
-  getAllUser() {
-    return this.UserRepository.find({ relations: ['branch'] });
+  async paginate(options: IPaginationOptions): Promise<Pagination<User>> {
+    return paginate<User>(this.UserRepository, options, {
+      relations: ['branch'],
+    });
   }
   async getUser(id: number, includePassword?: boolean) {
     const user = await this.UserRepository.findOne({
