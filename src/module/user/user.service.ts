@@ -1,6 +1,6 @@
 import { CloudflareService } from './../cloudflare/cloudflare.service';
 import { User } from '../../typeorm/entities/User';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { updateUserDto } from './dto/updateUser.dto';
@@ -11,12 +11,14 @@ import {
   paginate,
   Pagination,
 } from 'nestjs-typeorm-paginate';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private UserRepository: Repository<User>,
     private cloudflareService: CloudflareService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
   async getAllUser(options: IPaginationOptions): Promise<Pagination<User>> {
     return paginate<User>(this.UserRepository, options, {

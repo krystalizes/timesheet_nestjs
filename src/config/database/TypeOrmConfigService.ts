@@ -31,6 +31,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
           Timesheet,
         ],
         synchronize: process.env.SYNCHRONIZE === 'true',
+        cache: true,
         migrations: ['dist/config/database/migrations/*{.ts,.js}'],
       };
     }

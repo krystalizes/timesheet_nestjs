@@ -6,14 +6,14 @@ import { ProjectModule } from './module/project/project.module';
 import { UserProjectModule } from './module/user_project/user_project.module';
 import { TaskModule } from './module/task/task.module';
 import { TimesheetModule } from './module/timesheet/timesheet.module';
-// import { dataSourceOptions } from './config/database/ormConfig';
 import { AuthModule } from './module/auth/auth.module';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AtGuard } from './module/auth/common/guards';
 import { RolesGuard } from './module/auth/common/guards/role.guard';
 import { CloudflareModule } from './module/cloudflare/cloudflare.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmConfigService } from './config/database/TypeOrmConfigService';
+import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -25,6 +25,9 @@ import { TypeOrmConfigService } from './config/database/TypeOrmConfigService';
       imports: [ConfigModule],
       useClass: TypeOrmConfigService,
       inject: [ConfigService],
+    }),
+    CacheModule.register({
+      isGlobal: true,
     }),
     UserModule,
     ClientModule,
@@ -43,6 +46,10 @@ import { TypeOrmConfigService } from './config/database/TypeOrmConfigService';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor,
     },
   ],
 })
