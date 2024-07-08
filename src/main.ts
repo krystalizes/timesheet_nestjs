@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+import { HttpExceptionFilter } from './module/auth/common/filter/http-exception.filter';
 declare const module: any;
 
 async function bootstrap() {
@@ -11,6 +12,7 @@ async function bootstrap() {
   app.enableCors();
   app.use(helmet());
   app.use(cookieParser());
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
   const port = process.env.PORT;
   const config = new DocumentBuilder()
