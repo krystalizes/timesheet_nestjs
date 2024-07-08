@@ -14,6 +14,8 @@ import { CloudflareModule } from './module/cloudflare/cloudflare.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmConfigService } from './config/database/TypeOrmConfigService';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
+import { ScheduleModule } from '@nestjs/schedule';
+import { MailerModule } from './module/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -29,6 +31,7 @@ import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
     CacheModule.register({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     UserModule,
     ClientModule,
     ProjectModule,
@@ -37,6 +40,7 @@ import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
     TimesheetModule,
     AuthModule,
     CloudflareModule,
+    MailerModule,
   ],
   providers: [
     {

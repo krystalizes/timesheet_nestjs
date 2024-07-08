@@ -20,10 +20,15 @@ export class UserService {
     private cloudflareService: CloudflareService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
-  async getAllUser(options: IPaginationOptions): Promise<Pagination<User>> {
+  async getAllUserPaginate(
+    options: IPaginationOptions,
+  ): Promise<Pagination<User>> {
     return paginate<User>(this.UserRepository, options, {
       relations: ['branch'],
     });
+  }
+  getAllUser() {
+    return this.UserRepository.find();
   }
   async getUser(id: number, includePassword?: boolean) {
     const user = await this.UserRepository.findOne({
