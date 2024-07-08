@@ -16,9 +16,16 @@ import { TypeOrmConfigService } from './config/database/TypeOrmConfigService';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MailerModule } from './module/mailer/mailer.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 20,
+      },
+    ]),
     ConfigModule.forRoot({
       envFilePath: `src/config/env/${process.env.NODE_ENV}.env`,
       isGlobal: true,
@@ -50,6 +57,10 @@ import { MailerModule } from './module/mailer/mailer.module';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
     {
       provide: APP_INTERCEPTOR,

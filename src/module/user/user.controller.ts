@@ -40,6 +40,7 @@ export class UserController {
 
   @Get('/:id')
   getUser(@Param('id') id: number) {
+    console.log(1);
     return this.userService.getUser(id);
   }
   @Roles(Role.Admin)
