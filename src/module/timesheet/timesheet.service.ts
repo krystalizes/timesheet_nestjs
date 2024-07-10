@@ -10,6 +10,8 @@ import {
   paginate,
   Pagination,
 } from 'nestjs-typeorm-paginate';
+import { StartEndDateDto } from './dto/start-end-date.dto';
+import { TimesheetDto } from './dto/timesheets.dto';
 
 @Injectable()
 export class TimesheetService {
@@ -27,24 +29,24 @@ export class TimesheetService {
       relations: ['user_project', 'task', 'user_project.project'],
     });
   }
-  findTimesheetDay(id: number, start: Date) {
+  findTimesheetDay(id: number, dto: StartEndDateDto) {
     return this.TimesheetRepository.find({
       where: {
         user_project: {
           user: { id },
         },
-        day: start,
+        day: dto.start_date,
       },
       relations: ['user_project', 'task', 'user_project.project'],
     });
   }
-  findTimesheetWeek(id: number, start: Date, end: Date) {
+  findTimesheetWeek(id: number, dto: StartEndDateDto) {
     return this.TimesheetRepository.find({
       where: {
         user_project: {
           user: { id },
         },
-        day: Between(start, end),
+        day: Between(dto.start_date, dto.end_date),
       },
       relations: ['user_project', 'task', 'user_project.project'],
     });
@@ -73,8 +75,10 @@ export class TimesheetService {
       .groupBy('task.name')
       .getRawMany();
   }
-  async submit(userId: number, start: Date, end: Date): Promise<any> {
+  async submit(userId: number, dto: StartEndDateDto): Promise<any> {
     const userProjects = await this.userProjectService.findAllPrjOfUser(userId);
+    const start = dto.start_date;
+    const end = dto.end_date;
     const userProjectIds = userProjects.map((up) => up.id);
     return await this.TimesheetRepository.createQueryBuilder('timesheet')
       .update(Timesheet)
@@ -105,7 +109,8 @@ export class TimesheetService {
       .andWhere('timesheet.status = :status', { status: 'Pending' });
     return paginate<Timesheet>(queryBuilder, options);
   }
-  async approve(timesheetIds: number[]) {
+  async approve(dto: TimesheetDto) {
+    const timesheetIds = dto.timesheetIds;
     return await this.TimesheetRepository.createQueryBuilder('timesheet')
       .update(Timesheet)
       .set({ status: 'Approved' })
@@ -115,7 +120,8 @@ export class TimesheetService {
       })
       .execute();
   }
-  async reject(timesheetIds: number[]) {
+  async reject(dto: TimesheetDto) {
+    const timesheetIds = dto.timesheetIds;
     return await this.TimesheetRepository.createQueryBuilder('timesheet')
       .update(Timesheet)
       .set({ status: 'Rejected' })
