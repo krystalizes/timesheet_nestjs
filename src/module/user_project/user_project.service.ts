@@ -51,20 +51,13 @@ export class UserProjectService {
     });
     return userProjects.filter((up) => up.project.status !== 'Inactive');
   }
-  async findRoleUser(prj_id: number, user_id: number) {
+  async findRoleUser(id: number) {
     return await this.UserProjectRepository.findOne({
-      where: {
-        user: { id: user_id },
-        project: { id: prj_id },
-      },
+      where: { id },
     });
   }
-  async updateRole(
-    prj_id: number,
-    user_id: number,
-    updateUserProjectDto: UpdateUserProjectDto,
-  ) {
-    const user_project = await this.findRoleUser(prj_id, user_id);
+  async updateRole(id: number, updateUserProjectDto: UpdateUserProjectDto) {
+    const user_project = await this.findRoleUser(id);
     return await this.UserProjectRepository.save(
       Object.assign(user_project, updateUserProjectDto),
     );
@@ -78,10 +71,7 @@ export class UserProjectService {
       relations: ['project'],
     });
   }
-  async remove(prj_id: number, user_id: number) {
-    return await this.UserProjectRepository.delete({
-      user: { id: user_id },
-      project: { id: prj_id },
-    });
+  async remove(id: number) {
+    return await this.UserProjectRepository.delete({ id });
   }
 }

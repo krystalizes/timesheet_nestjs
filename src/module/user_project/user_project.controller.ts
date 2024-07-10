@@ -51,29 +51,21 @@ export class UserProjectController {
   findAllPrjOfUser(@Param('user_id') id: number) {
     return this.userProjectService.findAllPrjOfUser(id);
   }
-  @Get('/:prj_id/:user_id')
-  findRoleUser(
-    @Param('prj_id') prj_id: number,
-    @Param('user_id') user_id: number,
-  ) {
-    return this.userProjectService.findRoleUser(prj_id, user_id);
+  @Get('/:id')
+  findRoleUser(@Param('id') id: number) {
+    return this.userProjectService.findRoleUser(id);
   }
   @Roles(Role.Admin)
-  @Patch('/:prj_id/:user_id')
+  @Patch('/:id')
   updateRole(
-    @Param('prj_id') prj_id: number,
-    @Param('user_id') user_id: number,
+    @Param('id') id: number,
     @Body() updateUserProjectDto: UpdateUserProjectDto,
   ) {
-    return this.userProjectService.updateRole(
-      prj_id,
-      user_id,
-      updateUserProjectDto,
-    );
+    return this.userProjectService.updateRole(id, updateUserProjectDto);
   }
   @Roles(Role.Admin)
-  @Delete('/:prj_id/:user_id')
-  remove(@Param('prj_id') prj_id: number, @Param('user_id') user_id: number) {
-    return this.userProjectService.remove(prj_id, user_id);
+  @Delete('/:id')
+  remove(@Param('id') id: number) {
+    return this.userProjectService.remove(id);
   }
 }
