@@ -42,6 +42,10 @@ export class User {
   sex: string;
   @Column({ unique: true })
   phone: string;
+  @Column({
+    default: null,
+  })
+  image?: string;
   @Column({ default: '08:30-17:30' })
   work_time: string;
   @Column({

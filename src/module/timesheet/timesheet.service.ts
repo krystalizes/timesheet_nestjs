@@ -3,8 +3,16 @@ import { CreateTimesheetDto } from './dto/create-timesheet.dto';
 import { UpdateTimesheetDto } from './dto/update-timesheet.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Timesheet } from 'src/typeorm/entities/Timesheet';
-import { Between, In, Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { UserProjectService } from '../user_project/user_project.service';
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
+import { StartEndDateDto } from './dto/start-end-date.dto';
+import { TimesheetDto } from './dto/timesheets.dto';
+import { StartDateDto } from './dto/start-date.dto';
 
 @Injectable()
 export class TimesheetService {
@@ -13,42 +21,37 @@ export class TimesheetService {
     private TimesheetRepository: Repository<Timesheet>,
     private userProjectService: UserProjectService,
   ) {}
-  // tạo timesheet mới
   create(createTimesheetDto: CreateTimesheetDto) {
     return this.TimesheetRepository.save(createTimesheetDto);
   }
-  // get 1 timesheet theo id
   findOne(id: number) {
     return this.TimesheetRepository.findOne({
       where: { id },
       relations: ['user_project', 'task', 'user_project.project'],
     });
   }
-  // get tất cả timesheet trong ngày
-  findTimesheetDay(id: number, start: Date) {
+  findTimesheetDay(id: number, dto: StartDateDto) {
     return this.TimesheetRepository.find({
       where: {
         user_project: {
           user: { id },
         },
-        day: start,
+        day: dto.start_date,
       },
       relations: ['user_project', 'task', 'user_project.project'],
     });
   }
-  // get tất cả timesheet theo tuần(start và end thì frontend phải tự xác định)
-  findTimesheetWeek(id: number, start: Date, end: Date) {
+  findTimesheetWeek(id: number, dto: StartEndDateDto) {
     return this.TimesheetRepository.find({
       where: {
         user_project: {
           user: { id },
         },
-        day: Between(start, end),
+        day: Between(dto.start_date, dto.end_date),
       },
       relations: ['user_project', 'task', 'user_project.project'],
     });
   }
-  // get tất cả timesheet trong 1 project(dùng để hiển thị lên cho các chức năng của Manager project đó)
   findTimesheetInProject(id: number) {
     return this.TimesheetRepository.find({
       where: {
@@ -59,7 +62,6 @@ export class TimesheetService {
       relations: ['user_project', 'task'],
     });
   }
-  //lấy tổng thời gian của mỗi task trong project mà người login là Mangager project đó để show lên frontend
   async getTotalWorkTimeByTaskType(projectId: number) {
     const timesheets = await this.findTimesheetInProject(projectId);
     if (timesheets.length === 0) {
@@ -74,10 +76,10 @@ export class TimesheetService {
       .groupBy('task.name')
       .getRawMany();
   }
-
-  // submit timesheet
-  async submit(userId: number, start: Date, end: Date): Promise<any> {
+  async submit(userId: number, dto: StartEndDateDto): Promise<any> {
     const userProjects = await this.userProjectService.findAllPrjOfUser(userId);
+    const start = dto.start_date;
+    const end = dto.end_date;
     const userProjectIds = userProjects.map((up) => up.id);
     return await this.TimesheetRepository.createQueryBuilder('timesheet')
       .update(Timesheet)
@@ -89,23 +91,27 @@ export class TimesheetService {
       .andWhere('timesheet.status = :status', { status: 'New' })
       .execute();
   }
-  // get timesheet pending
-  async getTimesheetPend(id: number) {
+  async getTimesheetPend(
+    id: number,
+    options: IPaginationOptions,
+  ): Promise<Pagination<Timesheet>> {
     const projectIsManager =
       await this.userProjectService.findProjectIsManager(id);
     const projectIsManagerIds = projectIsManager.map((up) => up.project.id);
-    return await this.TimesheetRepository.find({
-      where: {
-        user_project: {
-          project: { id: In(projectIsManagerIds) },
-        },
-        status: 'Pending',
-      },
-      relations: ['user_project', 'task', 'user_project.project'],
-    });
+    const queryBuilder = this.TimesheetRepository.createQueryBuilder(
+      'timesheet',
+    )
+      .leftJoinAndSelect('timesheet.user_project', 'user_project')
+      .leftJoinAndSelect('timesheet.task', 'task')
+      .leftJoinAndSelect('user_project.project', 'project')
+      .where('user_project.project.id IN (:...projectIsManagerIds)', {
+        projectIsManagerIds,
+      })
+      .andWhere('timesheet.status = :status', { status: 'Pending' });
+    return paginate<Timesheet>(queryBuilder, options);
   }
-  // approve timesheet theo week(Manager)
-  async approve(timesheetIds: number[]) {
+  async approve(dto: TimesheetDto) {
+    const timesheetIds = dto.timesheetIds;
     return await this.TimesheetRepository.createQueryBuilder('timesheet')
       .update(Timesheet)
       .set({ status: 'Approved' })
@@ -115,8 +121,8 @@ export class TimesheetService {
       })
       .execute();
   }
-  // Reject timesheet theo week(Manager)
-  async reject(timesheetIds: number[]) {
+  async reject(dto: TimesheetDto) {
+    const timesheetIds = dto.timesheetIds;
     return await this.TimesheetRepository.createQueryBuilder('timesheet')
       .update(Timesheet)
       .set({ status: 'Rejected' })
@@ -126,7 +132,6 @@ export class TimesheetService {
       })
       .execute();
   }
-  // kiểm tra xem có timesheet nào với project này đã được log(nếu có thì không thể xoá project)
   checkProject(prj_id: number) {
     return this.TimesheetRepository.findOne({
       where: {
@@ -136,14 +141,12 @@ export class TimesheetService {
       },
     });
   }
-  // update timesheet( có thể thêm ràng buộc chỉ có thể sửa nếu là pending hoặc new(đã có ở frontend))
   async update(id: number, updateTimesheetDto: UpdateTimesheetDto) {
     const timesheet = await this.findOne(id);
     return await this.TimesheetRepository.save(
       Object.assign(timesheet, updateTimesheetDto),
     );
   }
-  // force delete timesheet
   delete(id: number) {
     return this.TimesheetRepository.delete(id);
   }

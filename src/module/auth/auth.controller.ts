@@ -13,9 +13,9 @@ import { RtGuard } from './common/guards';
 import { GetCurrentUser, GetCurrentUserId, Public } from './common/decorator';
 import { Roles } from './common/decorator/get-role-user.decorator';
 import { Role } from './common/enum/role.enum';
-import { updateUserDto } from '../user/dto/updateUser.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { LoginDto } from './dto/login.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -30,7 +30,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() signInDto: updateUserDto, @Res() res: Response) {
+  signIn(@Body() signInDto: LoginDto, @Res() res: Response) {
     return this.authService.signIn(signInDto, res);
   }
   @HttpCode(HttpStatus.OK)

@@ -3,9 +3,14 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from 'src/typeorm/entities/Task';
-import { EntityManager, ILike, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { FilterProjectDto } from '../project/dto/filter-project.dto';
 import { SearchProjectDto } from '../project/dto/search-project.dto';
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class TaskService {
@@ -13,7 +18,6 @@ export class TaskService {
     @InjectRepository(Task)
     private TaskRepository: Repository<Task>,
   ) {}
-  // tạo task mới( nếu là 5 task common được tạo khi tạo project thì có transaction để rollback )
   async create(createTaskDto: CreateTaskDto, entityManager?: EntityManager) {
     if (entityManager) {
       const task = entityManager.create(Task, createTaskDto);
@@ -23,13 +27,16 @@ export class TaskService {
       return await this.TaskRepository.save(task);
     }
   }
-  // tìm các task trong 1 project
-  findTaskInPrj(id: number) {
-    return this.TaskRepository.find({
-      where: { project: { id } },
-    });
+  async findTaskInPrj(
+    id: number,
+    options: IPaginationOptions,
+  ): Promise<Pagination<Task>> {
+    const queryBuilder = this.TaskRepository.createQueryBuilder('task')
+      .leftJoinAndSelect('task.project', 'project')
+      .where('task.project.id = :id', { id });
+
+    return paginate<Task>(queryBuilder, options);
   }
-  // tìm 1 task
   findOne(id: number) {
     return this.TaskRepository.findOne({
       where: { id },
@@ -37,36 +44,38 @@ export class TaskService {
       withDeleted: true,
     });
   }
-  // tìm task theo status
-  filterTasks(dto: FilterProjectDto) {
+  async filterTasks(
+    dto: FilterProjectDto,
+    options: IPaginationOptions,
+  ): Promise<Pagination<Task>> {
     const { status } = dto;
-    return this.TaskRepository.find({
-      where: { status },
-      relations: ['project'],
-    });
+    const queryBuilder = this.TaskRepository.createQueryBuilder('task')
+      .leftJoinAndSelect('task.project', 'project')
+      .where('task.status = :status', { status });
+
+    return paginate<Task>(queryBuilder, options);
   }
-  // tìm the theo tên task
-  searchByName(dto: SearchProjectDto) {
+  async searchByName(
+    dto: SearchProjectDto,
+    options: IPaginationOptions,
+  ): Promise<Pagination<Task>> {
     const { input } = dto;
-    return this.TaskRepository.find({
-      where: [{ name: ILike(`%${input}%`) }],
-      relations: ['project'],
-    });
+    const queryBuilder = this.TaskRepository.createQueryBuilder('task')
+      .leftJoinAndSelect('task.project', 'project')
+      .where('task.name LIKE :input', { input: `%${input}%` });
+
+    return paginate<Task>(queryBuilder, options);
   }
-  // update
   async update(id: number, updateTaskDto: UpdateTaskDto) {
     const task = await this.findOne(id);
     return await this.TaskRepository.save(Object.assign(task, updateTaskDto));
   }
-  // force delete
   delete(id: number) {
     return this.TaskRepository.delete(id);
   }
-  // soft delete
   remove(id: number) {
     return this.TaskRepository.softDelete(id);
   }
-  // restore from soft delete
   restore(id: number) {
     return this.TaskRepository.restore(id);
   }
