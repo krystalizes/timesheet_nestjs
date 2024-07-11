@@ -21,7 +21,10 @@ export class RefreshTokenMiddleware implements NestMiddleware {
       if (err.name === 'TokenExpiredError') {
         const refreshToken = req.cookies['refresh_token'];
         if (!refreshToken) {
-          throw new ForbiddenException('No refresh token found');
+          res.clearCookie('access_token');
+          throw new ForbiddenException(
+            'No refresh token found, proceed to logout',
+          );
         }
         const userId = (jwt.decode(refreshToken) as { id: number }).id;
         const newAccessToken = await this.authService.refreshTokens(
