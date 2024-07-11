@@ -21,6 +21,7 @@ import { Pagination } from 'nestjs-typeorm-paginate';
 import { Timesheet } from 'src/typeorm/entities/Timesheet';
 import { StartEndDateDto } from './dto/start-end-date.dto';
 import { TimesheetDto } from './dto/timesheets.dto';
+import { StartDateDto } from './dto/start-date.dto';
 @ApiTags('Timesheet')
 @Controller('timesheet')
 export class TimesheetController {
@@ -59,7 +60,7 @@ export class TimesheetController {
 
   @Get('day/:user_id')
   findTimesheetDay(
-    @Body() dto: StartEndDateDto,
+    @Body() dto: StartDateDto,
     @Param('user_id') user_id: number,
   ) {
     return this.timesheetService.findTimesheetDay(user_id, dto);

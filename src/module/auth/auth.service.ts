@@ -4,8 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { Tokens } from './types/token.type';
 import { AuthDto } from './dto/auth.dto';
-import { updateUserDto } from '../user/dto/updateUser.dto';
 import { Response } from 'express';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -57,7 +57,7 @@ export class AuthService {
     const hashedRt = await argon.hash(rt);
     await this.userService.updateUser(userId, { hashedRt });
   }
-  async signIn(dto: updateUserDto, @Res({ passthrough: true }) res: Response) {
+  async signIn(dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const email = dto.email;
     const user = await this.userService.findOne({ email });
     if (!user) throw new ForbiddenException('Access Denied');

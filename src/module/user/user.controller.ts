@@ -15,7 +15,7 @@ import {
 import { updateUserDto } from './dto/updateUser.dto';
 import { Roles } from '../auth/common/decorator/get-role-user.decorator';
 import { Role } from '../auth/common/enum/role.enum';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetCurrentUserId } from '../auth/common/decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Pagination } from 'nestjs-typeorm-paginate';
@@ -50,6 +50,19 @@ export class UserController {
   }
   @Post('/upload-avatar')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Avatar uploaded successfully.' })
   async addImg(
     @UploadedFile() file: Express.Multer.File,
     @GetCurrentUserId() id: number,

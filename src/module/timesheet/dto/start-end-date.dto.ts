@@ -1,10 +1,15 @@
-import { IsDateString, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsDateString } from 'class-validator';
 
 export class StartEndDateDto {
-  @IsOptional()
+  @ApiProperty({
+    example: '2024-07-01',
+  })
   @IsDateString()
   start_date: Date;
-  @IsOptional()
+  @ApiProperty({
+    example: '2024-07-07',
+  })
   @IsDateString()
   end_date: Date;
 }

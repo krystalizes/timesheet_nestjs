@@ -12,6 +12,7 @@ import {
 } from 'nestjs-typeorm-paginate';
 import { StartEndDateDto } from './dto/start-end-date.dto';
 import { TimesheetDto } from './dto/timesheets.dto';
+import { StartDateDto } from './dto/start-date.dto';
 
 @Injectable()
 export class TimesheetService {
@@ -29,7 +30,7 @@ export class TimesheetService {
       relations: ['user_project', 'task', 'user_project.project'],
     });
   }
-  findTimesheetDay(id: number, dto: StartEndDateDto) {
+  findTimesheetDay(id: number, dto: StartDateDto) {
     return this.TimesheetRepository.find({
       where: {
         user_project: {
