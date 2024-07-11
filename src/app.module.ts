@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './module/user/user.module';
 import { ClientModule } from './module/client/client.module';
@@ -17,6 +17,7 @@ import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MailerModule } from './module/mailer/mailer.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { RefreshTokenMiddleware } from './module/auth/common/middleware/refresh-token.middleware';
 
 @Module({
   imports: [
@@ -68,4 +69,8 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RefreshTokenMiddleware).forRoutes('*'); // Apply to all routes
+  }
+}

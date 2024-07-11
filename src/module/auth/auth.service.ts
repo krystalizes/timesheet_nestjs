@@ -27,7 +27,7 @@ export class AuthService {
         },
         {
           secret: process.env.JWT_SECRET,
-          expiresIn: 15 * 60,
+          expiresIn: 15,
         },
       ),
       this.jwtService.signAsync(
@@ -92,6 +92,6 @@ export class AuthService {
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
     });
-    return res.json(tokens.access_token);
+    return tokens.access_token;
   }
 }
