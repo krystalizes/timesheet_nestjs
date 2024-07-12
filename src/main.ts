@@ -3,21 +3,27 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import { HttpExceptionFilter } from './module/auth/common/filter/http-exception.filter';
 declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
+  app.use(helmet());
   app.use(cookieParser());
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
+  const port = process.env.PORT;
   const config = new DocumentBuilder()
     .setTitle('Timesheet API')
-    .setDescription('[Swagger JSON File](http://localhost:3000/api-json)')
+    .setDescription(`[Swagger JSON File](http://localhost:${port}/api-json)`)
     .setVersion('1.0')
     .addTag('Nestjs')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  await app.listen(3000);
+  await app.listen(port);
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());

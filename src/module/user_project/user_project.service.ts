@@ -4,6 +4,11 @@ import { UpdateUserProjectDto } from './dto/update-user_project.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User_project } from 'src/typeorm/entities/User_project';
 import { EntityManager, Repository } from 'typeorm';
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class UserProjectService {
@@ -11,7 +16,6 @@ export class UserProjectService {
     @InjectRepository(User_project)
     private UserProjectRepository: Repository<User_project>,
   ) {}
-  // tạo user_project mới, tạo khi tạo project thì sẽ trong transaction
   async create(
     createUserProjectDto: CreateUserProjectDto,
     entityManager?: EntityManager,
@@ -28,15 +32,18 @@ export class UserProjectService {
       return await this.UserProjectRepository.save(userProject);
     }
   }
-  // tìm các user trong 1 project
-  async findAllUserInPrj(id: number) {
-    return await this.UserProjectRepository.find({
-      select: ['user'],
-      where: { project: { id: id } },
-      relations: ['user'],
-    });
+  async findAllUserInPrj(
+    id: number,
+    options: IPaginationOptions,
+  ): Promise<Pagination<User_project>> {
+    const queryBuilder = this.UserProjectRepository.createQueryBuilder(
+      'user_project',
+    )
+      .leftJoinAndSelect('user_project.user', 'user')
+      .where('user_project.project.id = :id', { id });
+
+    return paginate<User_project>(queryBuilder, options);
   }
-  // tìm các project mà user đang join
   async findAllPrjOfUser(id: number) {
     const userProjects = await this.UserProjectRepository.find({
       where: { user: { id: id } },
@@ -44,26 +51,17 @@ export class UserProjectService {
     });
     return userProjects.filter((up) => up.project.status !== 'Inactive');
   }
-  async findRoleUser(prj_id: number, user_id: number) {
+  async findRoleUser(id: number) {
     return await this.UserProjectRepository.findOne({
-      where: {
-        user: { id: user_id },
-        project: { id: prj_id },
-      },
+      where: { id },
     });
   }
-  // update
-  async updateRole(
-    prj_id: number,
-    user_id: number,
-    updateUserProjectDto: UpdateUserProjectDto,
-  ) {
-    const user_project = await this.findRoleUser(prj_id, user_id);
+  async updateRole(id: number, updateUserProjectDto: UpdateUserProjectDto) {
+    const user_project = await this.findRoleUser(id);
     return await this.UserProjectRepository.save(
       Object.assign(user_project, updateUserProjectDto),
     );
   }
-  // tìm các project mà user là Manager
   async findProjectIsManager(id: number) {
     return await this.UserProjectRepository.find({
       where: {
@@ -73,11 +71,7 @@ export class UserProjectService {
       relations: ['project'],
     });
   }
-  // force delete( xoá user ra khỏi project )
-  async remove(prj_id: number, user_id: number) {
-    return await this.UserProjectRepository.delete({
-      user: { id: user_id },
-      project: { id: prj_id },
-    });
+  async remove(id: number) {
+    return await this.UserProjectRepository.delete({ id });
   }
 }

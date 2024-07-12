@@ -6,6 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -15,6 +18,8 @@ import { Role } from '../auth/common/enum/role.enum';
 import { FilterProjectDto } from '../project/dto/filter-project.dto';
 import { SearchProjectDto } from '../project/dto/search-project.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { Task } from 'src/typeorm/entities/Task';
 @ApiTags('Task')
 @Controller('task')
 export class TaskController {
@@ -25,18 +30,45 @@ export class TaskController {
     return this.taskService.create(createTaskDto);
   }
   @Get('/project/:prj_id')
-  findAll(@Param('prj_id') id: number) {
-    return this.taskService.findTaskInPrj(id);
+  findAll(
+    @Param('prj_id') id: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+  ): Promise<Pagination<Task>> {
+    limit = limit > 100 ? 100 : limit;
+    return this.taskService.findTaskInPrj(id, {
+      page,
+      limit,
+      route: `/task/project/${id}`,
+    });
   }
   @Roles(Role.Admin)
   @Get('/search')
-  searchByName(@Body() searchDto: SearchProjectDto) {
-    return this.taskService.searchByName(searchDto);
+  async searchByName(
+    @Body() searchDto: SearchProjectDto,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+  ): Promise<Pagination<Task>> {
+    limit = limit > 100 ? 100 : limit;
+    return this.taskService.searchByName(searchDto, {
+      page,
+      limit,
+      route: `/task/search`,
+    });
   }
   @Roles(Role.Admin)
   @Get('/filter')
-  filterTasks(@Body() filterDto: FilterProjectDto) {
-    return this.taskService.filterTasks(filterDto);
+  async filterTasks(
+    @Body() filterDto: FilterProjectDto,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+  ): Promise<Pagination<Task>> {
+    limit = limit > 100 ? 100 : limit;
+    return this.taskService.filterTasks(filterDto, {
+      page,
+      limit,
+      route: `/task/filter`,
+    });
   }
   @Roles(Role.Admin)
   @Get(':id')

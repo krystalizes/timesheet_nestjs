@@ -1,21 +1,35 @@
+import { CloudflareService } from './../cloudflare/cloudflare.service';
 import { User } from '../../typeorm/entities/User';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { updateUserDto } from './dto/updateUser.dto';
 import { AuthDto } from '../auth/dto/auth.dto';
 import { EmailUserDto } from './dto/email-user.dto';
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private UserRepository: Repository<User>,
+    private cloudflareService: CloudflareService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
-  // get mọi user
-  getAllUser() {
-    return this.UserRepository.find({ relations: ['branch'] });
+  async getAllUserPaginate(
+    options: IPaginationOptions,
+  ): Promise<Pagination<User>> {
+    return paginate<User>(this.UserRepository, options, {
+      relations: ['branch'],
+    });
   }
-  // get 1 user
+  getAllUser() {
+    return this.UserRepository.find();
+  }
   async getUser(id: number, includePassword?: boolean) {
     const user = await this.UserRepository.findOne({
       where: { id },
@@ -33,16 +47,24 @@ export class UserService {
       relations: ['branch'],
     });
   }
-  // tạo user
   createUser(createUserDto: AuthDto) {
     return this.UserRepository.save(createUserDto);
   }
-  // update user
   async updateUser(id: number, updateUserDto: updateUserDto) {
     const user = await this.getUser(id);
     const updatedUser = await this.UserRepository.save(
       Object.assign(user, updateUserDto),
     );
     return updatedUser;
+  }
+  async addImg(file: Express.Multer.File, id: number) {
+    const user = await this.getUser(id);
+    const key = `${file.originalname}${Date.now()}`;
+    if (user.image) {
+      const imageKey = user.image.split('/').pop();
+      await this.cloudflareService.deleteFile(imageKey);
+    }
+    const image = await this.cloudflareService.uploadFile(file, key);
+    return await this.updateUser(id, { image });
   }
 }
