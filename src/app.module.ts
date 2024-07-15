@@ -28,7 +28,7 @@ import { RefreshTokenMiddleware } from './module/auth/common/middleware/refresh-
       },
     ]),
     ConfigModule.forRoot({
-      envFilePath: `src/config/env/${process.env.NODE_ENV}.env`,
+      envFilePath: `src/config/env/.env.${process.env.NODE_ENV}`,
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
