@@ -1,5 +1,9 @@
 /node_modules
+.dockerignore
 .gitignore
 .git
 .prettierrc
 README.md
+Dockerfile
+Dockerfile.test
+dist

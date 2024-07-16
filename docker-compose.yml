@@ -3,6 +3,9 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
+      target: development
+    env_file:
+      - src/config/env/.env.development
     ports:
       - "${PORT}:${PORT}"
     volumes:
