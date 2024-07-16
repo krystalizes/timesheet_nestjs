@@ -1,3 +1,4 @@
+import { CacheDeleteService } from './../cache_delete/cache_delete.service';
 import {
   Controller,
   Get,
@@ -25,10 +26,14 @@ import { StartDateDto } from './dto/start-date.dto';
 @ApiTags('Timesheet')
 @Controller('timesheet')
 export class TimesheetController {
-  constructor(private readonly timesheetService: TimesheetService) {}
+  constructor(
+    private readonly timesheetService: TimesheetService,
+    private cacheDeleteService: CacheDeleteService,
+  ) {}
 
   @Post('create')
-  create(@Body() createTimesheetDto: CreateTimesheetDto) {
+  async create(@Body() createTimesheetDto: CreateTimesheetDto) {
+    await this.cacheDeleteService.clearCache(`timesheet`);
     return this.timesheetService.create(createTimesheetDto);
   }
 
@@ -75,28 +80,36 @@ export class TimesheetController {
   }
   @Roles(Role.PM)
   @Patch('/approve')
-  approve(@Body() dto: TimesheetDto) {
+  async approve(@Body() dto: TimesheetDto) {
+    await this.cacheDeleteService.clearCache(`timesheet`);
     return this.timesheetService.approve(dto);
   }
   @Roles(Role.PM)
   @Patch('/reject')
-  reject(@Body() dto: TimesheetDto) {
+  async reject(@Body() dto: TimesheetDto) {
+    await this.cacheDeleteService.clearCache(`timesheet`);
     return this.timesheetService.reject(dto);
   }
   @Patch('/submit')
-  submit(@GetCurrentUserId() id: number, @Body() between: StartEndDateDto) {
+  async submit(
+    @GetCurrentUserId() id: number,
+    @Body() between: StartEndDateDto,
+  ) {
+    await this.cacheDeleteService.clearCache(`timesheet`);
     return this.timesheetService.submit(id, between);
   }
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: number,
     @Body() updateTimesheetDto: UpdateTimesheetDto,
   ) {
+    await this.cacheDeleteService.clearCache(`timesheet`);
     return this.timesheetService.update(id, updateTimesheetDto);
   }
 
   @Delete('/:id')
-  delete(@Param('id') id: number) {
+  async delete(@Param('id') id: number) {
+    await this.cacheDeleteService.clearCache(`timesheet`);
     return this.timesheetService.delete(id);
   }
 }

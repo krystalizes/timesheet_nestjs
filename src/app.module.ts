@@ -18,6 +18,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { MailerModule } from './module/mailer/mailer.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { RefreshTokenMiddleware } from './module/auth/common/middleware/refresh-token.middleware';
+import { CacheDeleteModule } from './module/cache_delete/cache_delete.module';
 
 @Module({
   imports: [
@@ -38,6 +39,8 @@ import { RefreshTokenMiddleware } from './module/auth/common/middleware/refresh-
     }),
     CacheModule.register({
       isGlobal: true,
+      ttl: 10000,
+      max: 10,
     }),
     ScheduleModule.forRoot(),
     UserModule,
@@ -49,6 +52,7 @@ import { RefreshTokenMiddleware } from './module/auth/common/middleware/refresh-
     AuthModule,
     CloudflareModule,
     MailerModule,
+    CacheDeleteModule,
   ],
   providers: [
     {
@@ -71,6 +75,6 @@ import { RefreshTokenMiddleware } from './module/auth/common/middleware/refresh-
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RefreshTokenMiddleware).forRoutes('*'); // Apply to all routes
+    consumer.apply(RefreshTokenMiddleware).forRoutes('*');
   }
 }

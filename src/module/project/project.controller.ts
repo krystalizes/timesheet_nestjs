@@ -1,3 +1,4 @@
+import { CacheDeleteService } from './../cache_delete/cache_delete.service';
 import {
   Controller,
   Get,
@@ -23,10 +24,14 @@ import { Project } from 'src/typeorm/entities/Project';
 @ApiTags('Project')
 @Controller('project')
 export class ProjectController {
-  constructor(private readonly projectService: ProjectService) {}
+  constructor(
+    private readonly projectService: ProjectService,
+    private cacheDeleteService: CacheDeleteService,
+  ) {}
   @Roles(Role.Admin)
   @Post('/create')
-  create(@Body() createProjectDto: CreateProjectDto) {
+  async create(@Body() createProjectDto: CreateProjectDto) {
+    await this.cacheDeleteService.clearCache(`project`);
     return this.projectService.create(createProjectDto);
   }
   @Roles(Role.Admin)
@@ -93,17 +98,23 @@ export class ProjectController {
 
   @Roles(Role.Admin)
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updateProjectDto: UpdateProjectDto) {
+  async update(
+    @Param('id') id: number,
+    @Body() updateProjectDto: UpdateProjectDto,
+  ) {
+    await this.cacheDeleteService.clearCache(`project`);
     return this.projectService.update(id, updateProjectDto);
   }
   @Roles(Role.Admin)
   @Delete('/:id')
-  remove(@Param('id') id: number) {
+  async remove(@Param('id') id: number) {
+    await this.cacheDeleteService.clearCache(`project`);
     return this.projectService.remove(id);
   }
   @Roles(Role.Admin)
   @Patch('/restore/:id')
-  restore(@Param('id') id: number) {
+  async restore(@Param('id') id: number) {
+    await this.cacheDeleteService.clearCache(`project`);
     return this.projectService.restore(id);
   }
 }

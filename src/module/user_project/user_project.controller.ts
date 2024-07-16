@@ -1,3 +1,4 @@
+import { CacheDeleteService } from './../cache_delete/cache_delete.service';
 import {
   Controller,
   Get,
@@ -21,10 +22,14 @@ import { User_project } from 'src/typeorm/entities/User_project';
 @ApiTags('User Project')
 @Controller('user_project')
 export class UserProjectController {
-  constructor(private readonly userProjectService: UserProjectService) {}
+  constructor(
+    private readonly userProjectService: UserProjectService,
+    private cacheDeleteService: CacheDeleteService,
+  ) {}
   @Roles(Role.Admin)
   @Post('/create')
-  create(@Body() createUserProjectDto: CreateUserProjectDto) {
+  async create(@Body() createUserProjectDto: CreateUserProjectDto) {
+    await this.cacheDeleteService.clearCache(`user_project`);
     return this.userProjectService.create(createUserProjectDto);
   }
   @Roles(Role.PM)
@@ -57,15 +62,17 @@ export class UserProjectController {
   }
   @Roles(Role.Admin)
   @Patch('/:id')
-  updateRole(
+  async updateRole(
     @Param('id') id: number,
     @Body() updateUserProjectDto: UpdateUserProjectDto,
   ) {
+    await this.cacheDeleteService.clearCache(`user_project`);
     return this.userProjectService.updateRole(id, updateUserProjectDto);
   }
   @Roles(Role.Admin)
   @Delete('/:id')
-  remove(@Param('id') id: number) {
+  async remove(@Param('id') id: number) {
+    await this.cacheDeleteService.clearCache(`user_project`);
     return this.userProjectService.remove(id);
   }
 }

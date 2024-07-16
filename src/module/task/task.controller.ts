@@ -1,3 +1,4 @@
+import { CacheDeleteService } from './../cache_delete/cache_delete.service';
 import {
   Controller,
   Get,
@@ -23,10 +24,14 @@ import { Task } from 'src/typeorm/entities/Task';
 @ApiTags('Task')
 @Controller('task')
 export class TaskController {
-  constructor(private readonly taskService: TaskService) {}
+  constructor(
+    private readonly taskService: TaskService,
+    private cacheDeleteService: CacheDeleteService,
+  ) {}
   @Roles(Role.Admin)
   @Post('/create')
-  create(@Body() createTaskDto: CreateTaskDto) {
+  async create(@Body() createTaskDto: CreateTaskDto) {
+    await this.cacheDeleteService.clearCache(`task`);
     return this.taskService.create(createTaskDto);
   }
   @Get('/project/:prj_id')
@@ -77,22 +82,26 @@ export class TaskController {
   }
   @Roles(Role.Admin)
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updateTaskDto: UpdateTaskDto) {
+  async update(@Param('id') id: number, @Body() updateTaskDto: UpdateTaskDto) {
+    await this.cacheDeleteService.clearCache(`task`);
     return this.taskService.update(id, updateTaskDto);
   }
   @Roles(Role.Admin)
   @Delete('/:id')
-  delete(@Param('id') id: number) {
+  async delete(@Param('id') id: number) {
+    await this.cacheDeleteService.clearCache(`task`);
     return this.taskService.delete(id);
   }
   @Roles(Role.Admin)
   @Delete('/soft_del/:id')
-  remove(@Param('id') id: number) {
+  async remove(@Param('id') id: number) {
+    await this.cacheDeleteService.clearCache(`task`);
     return this.taskService.remove(id);
   }
   @Roles(Role.Admin)
   @Patch('/restore/:id')
-  restore(@Param('id') id: number) {
+  async restore(@Param('id') id: number) {
+    await this.cacheDeleteService.clearCache(`task`);
     return this.taskService.restore(id);
   }
 }

@@ -1,3 +1,4 @@
+import { CacheDeleteService } from './../cache_delete/cache_delete.service';
 import {
   Controller,
   Get,
@@ -20,7 +21,10 @@ import { Client } from 'src/typeorm/entities/Client';
 @ApiTags('Client')
 @Controller('client')
 export class ClientController {
-  constructor(private readonly clientService: ClientService) {}
+  constructor(
+    private readonly clientService: ClientService,
+    private cacheDeleteService: CacheDeleteService,
+  ) {}
   @Roles(Role.Admin)
   @Get('/')
   findAll(
@@ -36,7 +40,8 @@ export class ClientController {
   }
   @Roles(Role.Admin)
   @Post('/create')
-  create(@Body() createClientDto: CreateClientDto) {
+  async create(@Body() createClientDto: CreateClientDto) {
+    await this.cacheDeleteService.clearCache(`client`);
     return this.clientService.create(createClientDto);
   }
   @Roles(Role.Admin)
@@ -46,7 +51,11 @@ export class ClientController {
   }
   @Roles(Role.Admin)
   @Patch('/:id')
-  update(@Param('id') id: number, @Body() updateClientDto: UpdateClientDto) {
+  async update(
+    @Param('id') id: number,
+    @Body() updateClientDto: UpdateClientDto,
+  ) {
+    await this.cacheDeleteService.clearCache(`client`);
     return this.clientService.update(id, updateClientDto);
   }
 }

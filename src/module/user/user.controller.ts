@@ -1,3 +1,4 @@
+import { CacheDeleteService } from './../cache_delete/cache_delete.service';
 import { UserService } from './user.service';
 import {
   Body,
@@ -23,7 +24,10 @@ import { User } from 'src/typeorm/entities/User';
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private cacheDeleteService: CacheDeleteService,
+  ) {}
   @Roles(Role.Admin)
   @Get('/')
   async getAllUser(
@@ -40,12 +44,15 @@ export class UserController {
 
   @Get('/:id')
   getUser(@Param('id') id: number) {
-    console.log(1);
     return this.userService.getUser(id);
   }
   @Roles(Role.Admin)
   @Patch('/:id')
-  updateUser(@Param('id') id: number, @Body() updateUserData: updateUserDto) {
+  async updateUser(
+    @Param('id') id: number,
+    @Body() updateUserData: updateUserDto,
+  ) {
+    await this.cacheDeleteService.clearCache(`user`);
     return this.userService.updateUser(id, updateUserData);
   }
   @Post('/upload-avatar')
@@ -68,5 +75,6 @@ export class UserController {
     @GetCurrentUserId() id: number,
   ) {
     await this.userService.addImg(file, id);
+    await this.cacheDeleteService.clearCache(`user`);
   }
 }

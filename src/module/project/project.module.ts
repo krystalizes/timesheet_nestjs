@@ -7,6 +7,7 @@ import { UserProjectModule } from 'src/module/user_project/user_project.module';
 import { UserModule } from 'src/module/user/user.module';
 import { TaskModule } from '../task/task.module';
 import { TimesheetModule } from '../timesheet/timesheet.module';
+import { CacheDeleteModule } from '../cache_delete/cache_delete.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { TimesheetModule } from '../timesheet/timesheet.module';
     UserModule,
     TaskModule,
     TimesheetModule,
+    CacheDeleteModule,
   ],
   controllers: [ProjectController],
   providers: [ProjectService],
