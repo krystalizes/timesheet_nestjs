@@ -11,6 +11,7 @@ import {
   paginate,
   Pagination,
 } from 'nestjs-typeorm-paginate';
+import { PhoneUserDto } from './dto/phone-user.dto';
 @Injectable()
 export class UserService {
   constructor(
@@ -41,6 +42,13 @@ export class UserService {
     const { email } = emailUserDto;
     return this.UserRepository.findOne({
       where: { email },
+      relations: ['branch'],
+    });
+  }
+  async findOneWPhone(phoneDto: PhoneUserDto) {
+    const { phone } = phoneDto;
+    return this.UserRepository.findOne({
+      where: { phone },
       relations: ['branch'],
     });
   }

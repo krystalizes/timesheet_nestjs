@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, Res } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  Res,
+} from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
@@ -48,6 +53,12 @@ export class AuthService {
     };
   }
   async signUp(dto: AuthDto) {
+    const email = dto.email;
+    const phone = dto.phone;
+    const user = await this.userService.findOne({ email });
+    if (user) throw new ConflictException('User existed');
+    const user1 = await this.userService.findOneWPhone({ phone });
+    if (user1) throw new ConflictException('Phone used');
     const hash = await argon.hash(dto.password);
     dto.password = hash;
     const newUser = await this.userService.createUser(dto);
@@ -60,9 +71,9 @@ export class AuthService {
   async signIn(dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const email = dto.email;
     const user = await this.userService.findOne({ email });
-    if (!user) throw new ForbiddenException('Access Denied');
+    if (!user) throw new ForbiddenException('Account not existed');
     const passwordMatches = await argon.verify(user.password, dto.password);
-    if (!passwordMatches) throw new ForbiddenException('Access Denied');
+    if (!passwordMatches) throw new ForbiddenException('Wrong password');
     const tokens = await this.getTokens(user.id, user.email, user.role);
     await this.updateRtHash(user.id, tokens.refresh_token);
     res.cookie('access_token', tokens.access_token, {
