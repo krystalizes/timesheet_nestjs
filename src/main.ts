@@ -28,5 +28,5 @@ async function bootstrap() {
     module.hot.accept();
     module.hot.dispose(() => app.close());
   }
-}
+}      
 bootstrap();
