@@ -17,7 +17,7 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sh 'nohup npm run start:dev > nohup.out 2>&1 </dev/null &'
+                sh 'npm run start:dev'
             }
         }     
     }
