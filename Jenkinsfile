@@ -11,6 +11,7 @@ pipeline {
                 sh 'npm install'
                 sh 'npm run build'
                 sh 'mkdir -p "${WORKSPACE}/src/config/env"'
+                sh 'rm -f "${WORKSPACE}/src/config/env/.env.development"'
                 sh 'cp /projects/.env.development "${WORKSPACE}/src/config/env/"'
             }
         }
