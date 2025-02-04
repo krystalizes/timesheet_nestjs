@@ -17,6 +17,6 @@ pipeline {
                 echo 'Deploying application...'
                 // Add deployment steps here
             }
-        }
+        }     
     }
 }    
