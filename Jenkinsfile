@@ -1,10 +1,26 @@
 pipeline {
     agent any
-
     stages {
-        stage('Hello') {
+        stage('Checkout') {
             steps {
-                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'github-token', url: 'https://github.com/krystalizes/timesheet_nestjs.git']])
+                checkout scm
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'npm install'
+                sh 'npm run build'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'npm test'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+                // Add deployment steps here
             }
         }
     }
