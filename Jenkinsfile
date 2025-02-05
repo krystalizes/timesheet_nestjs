@@ -21,7 +21,8 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sh 'npm run start:dev'
+                // sh 'npm run start:dev'
+                echo "Build success"
             }
         }     
     }
@@ -37,7 +38,8 @@ pipeline {
                     sh 'rm -rf ${WORKSPACE}/*'
                     sh 'cp -r ${PREV_BUILD_DIR}/* ${WORKSPACE}/'
                     echo "Restored previous build, redeploying..."
-                    sh 'npm run start:dev'
+                    // sh 'npm run start:dev'
+                    echo "Build previous success"
                 } else {
                     echo "No previous build found!"
                 }
