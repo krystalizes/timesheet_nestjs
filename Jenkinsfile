@@ -23,6 +23,7 @@ pipeline {
             steps {
                 // sh 'npm run start:dev'
                 echo "Build success"
+                sh 'exit 1'
             }
         }     
     }
@@ -36,7 +37,7 @@ pipeline {
             echo "Build failed! Trying the previous build instead"
             script {
                 if (fileExists("${PREV_BUILD_DIR}")) {
-                    sh 'rm -rf "${WORKSPACE}/*"'
+                    sh 'rm -rf ${WORKSPACE}/*'
                     sh 'cp -r ${PREV_BUILD_DIR}/* "${WORKSPACE}"'
                     echo "Restored previous build, redeploying..."
                     // sh 'npm run start:dev'
