@@ -29,7 +29,7 @@ pipeline {
     post {
         success {
             echo "Build successful, updating previous build backup..."
-            sh 'rm -rf ${PREV_BUILD_DIR} && cp -r ${WORKSPACE} ${PREV_BUILD_DIR}'
+            sh 'rm -rf ${PREV_BUILD_DIR}/* && cp -r ${WORKSPACE} ${PREV_BUILD_DIR}'
         }
         failure {
             echo "Build failed! Trying the previous build instead"
