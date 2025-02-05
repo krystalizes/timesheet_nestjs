@@ -13,6 +13,7 @@ pipeline {
                 sh 'mkdir -p "${WORKSPACE}/src/config/env"'
                 sh 'rm -f "${WORKSPACE}/src/config/env/.env.development"'
                 sh 'cp /projects/.env.development "${WORKSPACE}/src/config/env/"'
+                addBadge(text: "1.0.0")
             }
         }
         stage('Deploy') {
