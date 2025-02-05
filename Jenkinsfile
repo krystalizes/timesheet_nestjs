@@ -30,14 +30,14 @@ pipeline {
         success {
             echo "Build successful, updating previous build backup..."
             sh '[ ! -d "${PREV_BUILD_DIR}" ] && mkdir -p "${PREV_BUILD_DIR}"'
-            sh 'rm -rf ${PREV_BUILD_DIR}/* && cp -r ${WORKSPACE}/* ${PREV_BUILD_DIR}'
+            sh 'rm -rf "${PREV_BUILD_DIR}/*" && cp -r "${WORKSPACE}/*" "${PREV_BUILD_DIR}"'
         }
         failure {
             echo "Build failed! Trying the previous build instead"
             script {
                 if (fileExists("${PREV_BUILD_DIR}")) {
-                    sh 'rm -rf ${WORKSPACE}/*'
-                    sh 'cp -r ${PREV_BUILD_DIR}/* ${WORKSPACE}/'
+                    sh 'rm -rf "${WORKSPACE}/*"'
+                    sh 'cp -r "${PREV_BUILD_DIR}/*" "${WORKSPACE}"'
                     echo "Restored previous build, redeploying..."
                     // sh 'npm run start:dev'
                     echo "Build previous success"
