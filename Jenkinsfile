@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        PREV_BUILD_DIR = "${WORKSPACE}/prev_build"
+        PREV_BUILD_DIR = "${WORKSPACE}/../prev_build"
     }
     stages {
         stage('Checkout') {
