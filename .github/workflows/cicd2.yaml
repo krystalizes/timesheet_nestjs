@@ -50,7 +50,7 @@ jobs:
     environment: ${{ github.ref_name }}
     if: > 
       github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' ||
-      github.event_name == 'push' && needs.check_workflow.outputs.should_run == 'true'
+      github.event_name == 'push' && needs.check_workflow.outputs.should_run == 'false'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
