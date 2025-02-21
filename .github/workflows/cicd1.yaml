@@ -1,0 +1,28 @@
+name: Build CMS Package Image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - stg
+      - prod
+
+    paths:
+      - '.github/workflows/cicd1.yaml'
+      - 'Dockerfile'
+
+jobs:
+  build_image:
+    runs-on: ubuntu-latest
+    name: BUILD CMS PACKAGE IMAGE
+    environment:  ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      
+      - name: Build, tag, and push image to AWS ECR backend
+        id: build-image-cms
+        run: |
+          docker build -t test -f Dockerfile .
