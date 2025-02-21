@@ -4,13 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - master
       - stg
       - prod
 
-    paths:
-      - '.github/workflows/cicd1.yaml'
-      - 'Dockerfile'
 
 jobs:
   build_image:

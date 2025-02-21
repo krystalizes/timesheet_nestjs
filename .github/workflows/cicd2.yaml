@@ -1,0 +1,29 @@
+name: Deploy CMS ECS on AWS
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Build CMS Package Image"]
+    types:
+      - completed
+  push:
+    branches:
+      - master
+      - stg
+      - prod
+
+
+jobs:
+  build_image:
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' ||
+      github.event_name == 'push' && github.event.workflow_run == null }}
+    runs-on: ubuntu-latest
+    name: DEPLOY CMS
+    environment:  ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build, tag, and push image to AWS ECR backend
+        id: build-image-cms
+        run: |
+          docker build -t test2 -f Dockerfile-apps .
