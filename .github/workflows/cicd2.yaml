@@ -39,23 +39,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check for Changes in Package Repo
-        id: check_changes
-        run: |
-          if [[ "${{ env.should_run }}" == "false" ]]; then
-            exit 0  # Skip checking for changes if workflow is already running
-          fi
-
-          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
-
-          if echo "$CHANGED_FILES" | grep -q '^src/'; then
-            echo "Changes detected in package repo."
-            echo "should_run=true" >> $GITHUB_ENV
-          else
-            echo "No relevant changes found."
-            echo "should_run=false" >> $GITHUB_ENV
-          fi
-
       - name: Set Output
         id: set_output
         run: echo "should_run=${{ env.should_run }}" >> $GITHUB_OUTPUT
