@@ -36,6 +36,8 @@ jobs:
             echo "No running workflows, checking for file changes..."
             echo "should_run=true" >> $GITHUB_ENV
           fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set Output
         id: set_output
