@@ -30,17 +30,14 @@ jobs:
 
           if [[ "$RUNNING_COUNT" -gt 0 ]]; then
             echo "Build CMS Package Image workflow is running, skipping deployment."
-            echo "should_run=false" >> $GITHUB_ENV
+            echo "should_run=false" >> $GITHUB_OUTPUT
           else
             echo "No running workflows, checking for file changes..."
-            echo "should_run=true" >> $GITHUB_ENV
+            echo "should_run=true" >> $GITHUB_OUTPUT
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set Output
-        id: set_output
-        run: echo "should_run=${{ env.should_run }}" >> $GITHUB_OUTPUT
 
   run_cicd2:
     needs: check_workflow
