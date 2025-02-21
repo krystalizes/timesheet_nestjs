@@ -26,12 +26,8 @@ jobs:
       - name: Check if Workflow is Running
         id: check_running
         run: |
-          WORKFLOW_NAME="Build CMS Package Image"
-          REPO="${{ github.repository }}"
-          TOKEN="${{ secrets.GITHUB_TOKEN }}"
-
-           RUNNING_COUNT=$(gh api repos/$REPO/actions/runs \
-            --jq '[.workflow_runs[] | select(.name=="'$WORKFLOW_NAME'" and .status=="in_progress")] | length')
+          RUNNING_COUNT=$(gh api repos/${{ github.repository }}/actions/runs \
+            --jq '[.workflow_runs[] | select(.name=="Build CMS Package Image" and .status=="in_progress")] | length')
 
           if [[ "$RUNNING_COUNT" -gt 0 ]]; then
             echo "Build CMS Package Image workflow is running, skipping deployment."
