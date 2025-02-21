@@ -39,18 +39,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set Output
-        id: set_output
-        run: echo "should_run=${{ env.should_run }}" >> $GITHUB_OUTPUT
+
 
   run_cicd2:
-    needs: check_workflow
     runs-on: ubuntu-latest
     name: Deploy CMS to AWS ECS
     environment: ${{ github.ref_name }}
     if: > 
       github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' ||
-      github.event_name == 'push' && needs.check_workflow.outputs.should_run == 'true'
+      github.event_name == 'push' && env.should_run == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
