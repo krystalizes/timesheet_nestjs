@@ -13,33 +13,75 @@ on:
       - prod
 
 jobs:
-  build_image:
+  check_workflow:
+    if: github.event_name == 'push'  # Only run on push events
     runs-on: ubuntu-latest
-    name: DEPLOY CMS
-    environment: ${{ github.ref_name }}
+    name: Check Workflow & Changes
+    outputs:
+      should_run: ${{ steps.set_output.outputs.should_run }}
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Check if Workflow is Running
+        id: check_running
+        run: |
+          WORKFLOW_NAME="Build CMS Package Image"
+          REPO="${{ github.repository }}"
+          TOKEN="${{ secrets.GITHUB_TOKEN }}"
+
+           RUNNING_COUNT=$(gh api repos/$REPO/actions/runs \
+            --jq '[.workflow_runs[] | select(.name=="'$WORKFLOW_NAME'" and .status=="in_progress")] | length')
+
+          if [[ "$RUNNING_COUNT" -gt 0 ]]; then
+            echo "Build CMS Package Image workflow is running, skipping deployment."
+            echo "should_run=false" >> $GITHUB_ENV
+          else
+            echo "No running workflows, checking for file changes..."
+            echo "should_run=true" >> $GITHUB_ENV
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check for Changes in Package Repo
         id: check_changes
         run: |
+          if [[ "${{ env.should_run }}" == "false" ]]; then
+            exit 0  # Skip checking for changes if workflow is already running
+          fi
+
           CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
 
           if echo "$CHANGED_FILES" | grep -q '^src/'; then
-            echo "Changes detected in the packages repo"
-            echo "has_changes=true" >> $GITHUB_ENV
+            echo "Changes detected in package repo."
+            echo "should_run=true" >> $GITHUB_ENV
           else
-            echo "No changes in the packages repo"
-            echo "has_changes=false" >> $GITHUB_ENV
+            echo "No relevant changes found."
+            echo "should_run=false" >> $GITHUB_ENV
           fi
 
-    if: > 
-      github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' || 
-      (github.event_name == 'push' && env.has_changes == 'true')
+      - name: Set Output
+        id: set_output
+        run: echo "should_run=${{ env.should_run }}" >> $GITHUB_OUTPUT
 
+  run_cicd2:
+    needs: check_workflow
+    runs-on: ubuntu-latest
+    name: Deploy CMS to AWS ECS
+    environment: ${{ github.ref_name }}
+    if: > 
+      github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' ||
+      github.event_name == 'push' && needs.check_workflow.outputs.should_run == 'true'
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Build, tag, and push image to AWS ECR backend
         id: build-image-cms
         run: |
           docker build -t test2 -f Dockerfile .
+
+      - name: Deploy to AWS ECS
+        id: deploy
+        run: |
+          echo "Deploying to AWS ECS..."
