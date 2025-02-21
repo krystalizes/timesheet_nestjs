@@ -15,8 +15,7 @@ on:
 
 jobs:
   build_image:
-    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' ||
-      github.event_name == 'push' && github.event.workflow_run == null }}
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     name: DEPLOY CMS
     environment:  ${{ github.ref_name }}
