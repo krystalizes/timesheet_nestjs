@@ -1,0 +1,70 @@
+name: Deploy CMS ECS on AWS
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Build CMS Package Image]
+    types:
+      - completed
+  push:
+    branches:
+      - master
+      - test
+      - prod
+
+jobs:
+  check_workflow:
+    runs-on: ubuntu-latest
+    name: Check Workflow & Changes
+    outputs:
+      should_run: ${{ steps.set_output.outputs.should_run }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+      - name: Check Branch
+        run: git branch
+        
+      - name: Check Environment
+        run: env
+      - name: Check if Workflow is Running
+        id: check_running
+        run: |
+          echo "Branch: ${{ github.event.workflow_run.head_branch }}" 
+          RUNNING_COUNT=$(gh api repos/${{ github.repository }}/actions/runs \
+            --jq '[.workflow_runs[] | select(.name=="Build CMS Package Image" and .status=="in_progress")] | length')
+
+          if [[ "$RUNNING_COUNT" -gt 0 ]]; then
+            echo "Build CMS Package Image workflow is running, skipping deployment."
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          else
+            echo "No running workflows, checking for file changes..."
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  run_cicd2:
+    needs: check_workflow
+    runs-on: ubuntu-latest
+    name: Deploy CMS to AWS ECS
+    environment: ${{ github.ref_name }}
+    if: > 
+      github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' ||
+      github.event_name == 'push' && needs.check_workflow.outputs.should_run == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+
+      - name: Build, tag, and push image to AWS ECR backend
+        id: build-image-cms
+        run: |
+          echo "Branch: ${{ github.ref_name }}" 
+
+      - name: Deploy to AWS ECS
+        id: deploy
+        run: |
+          echo "Deploying to AWS ECS..."
