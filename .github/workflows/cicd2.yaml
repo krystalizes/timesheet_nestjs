@@ -26,7 +26,7 @@ jobs:
 
       - name: Check if Workflow is Running
         id: check_running
-        run: |\
+        run: |
           echo "Branch: ${{ github.event.workflow_run.head_branch }}"
           RUNNING_COUNT=$(gh api repos/${{ github.repository }}/actions/runs \
             --jq '[.workflow_runs[] | select(.name=="Build CMS Package Image" and .status=="in_progress")] | length')
