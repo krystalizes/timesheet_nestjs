@@ -21,10 +21,13 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: Check if Workflow is Running
         id: check_running
-        run: |
+        run: |\
+          echo "${{ github.event.workflow_run.head_branch }}"
           RUNNING_COUNT=$(gh api repos/${{ github.repository }}/actions/runs \
             --jq '[.workflow_runs[] | select(.name=="Build CMS Package Image" and .status=="in_progress")] | length')
 
