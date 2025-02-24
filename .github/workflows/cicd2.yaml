@@ -54,10 +54,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-//      - name: Build, tag, and push image to AWS ECR backend
-//        id: build-image-cms
-//        run: |
-//          docker build -t test2 -f Dockerfile .
+
 
       - name: Deploy to AWS ECS
         id: deploy
