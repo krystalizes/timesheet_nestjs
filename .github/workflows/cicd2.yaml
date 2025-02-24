@@ -2,10 +2,6 @@ name: Deploy CMS ECS on AWS
 
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: [Build CMS Package Image]
-    types:
-      - completed
   push:
     branches:
       - master
@@ -21,13 +17,9 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.workflow_run.head_branch }}
       - name: Check Branch
         run: git branch
         
-      - name: Check Environment
-        run: env
       - name: Check if Workflow is Running
         id: check_running
         run: |
@@ -52,7 +44,7 @@ jobs:
     name: Deploy CMS to AWS ECS
     environment: ${{ github.ref_name }}
     if: > 
-      github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' ||
+      github.event_name == 'workflow_dispatch' ||
       github.event_name == 'push' && needs.check_workflow.outputs.should_run == 'true'
     steps:
       - name: Checkout
