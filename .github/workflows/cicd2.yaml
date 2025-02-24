@@ -3,7 +3,7 @@ name: Deploy CMS ECS on AWS
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["Build CMS Package Image"]
+    workflows: [Build CMS Package Image]
     types:
       - completed
   push:
