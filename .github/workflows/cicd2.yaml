@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Check Workflow & Changes
     outputs:
-      should_run: ${{ steps.set_output.outputs.should_run }}
+      should_run: ${{ steps.set_output.outputs.should_run }} 
     steps:
       - name: Wait for Build Package Image
         run: sleep 10
