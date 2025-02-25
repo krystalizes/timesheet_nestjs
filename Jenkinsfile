@@ -12,6 +12,9 @@ pipeline {
         }
         stage('Build') {
             steps {
+                echo "${BUILD_NUMBER}"
+                echo "${BUILD_ID}"
+                echo "${BUILD_DISPLAY_NAME}"
                 sh 'npm install'
                 sh 'npm run build'
                 sh 'mkdir -p "${WORKSPACE}/src/config/env"'
