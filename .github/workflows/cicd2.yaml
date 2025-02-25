@@ -15,6 +15,9 @@ jobs:
     outputs:
       should_run: ${{ steps.set_output.outputs.should_run }}
     steps:
+      - name: Wait for Build Package Image
+        run: sleep 10
+
       - name: Checkout Code
         uses: actions/checkout@v3
       - name: Check Branch
