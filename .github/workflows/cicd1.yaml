@@ -1,0 +1,35 @@
+name: Build CMS Package Image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - test
+      - prod
+
+
+jobs:
+  build_image:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    name: BUILD CMS PACKAGE IMAGE
+    environment:  ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      
+      - name: Build, tag, and push image to AWS ECR backend
+        id: build-image-cms
+        run: |
+          docker build -t test -f Dockerfile .
+      - name: Trigger Another Workflow
+        run: |
+          gh api --method POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            /repos/${{ github.repository }}/actions/workflows/cicd2.yaml/dispatches \
+            -f ref=${{ github.ref_name }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
