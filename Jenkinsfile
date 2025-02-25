@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         PREV_BUILD_DIR = "${WORKSPACE}/../prev_build"
-        COMMIT_HASH = "${GIT_COMMIT}"
+        COMMIT_HASH = sh(script: "git rev-parse --short ${GIT_COMMIT}", returnStdout: true).trim()
     }
     stages {
         stage('Checkout') {
@@ -12,9 +12,6 @@ pipeline {
         }
         stage('Build') {
             steps {
-                echo "${BUILD_NUMBER}"
-                echo "${BUILD_ID}"
-                echo "${BUILD_DISPLAY_NAME}"
                 sh 'npm install'
                 sh 'npm run build'
                 sh 'mkdir -p "${WORKSPACE}/src/config/env"'
