@@ -2,6 +2,7 @@ pipeline {
     agent any
     environment {
         PREV_BUILD_DIR = "${WORKSPACE}/../prev_build"
+        COMMIT_HASH = "${GIT_COMMIT}"
     }
     stages {
         stage('Checkout') {
@@ -16,7 +17,7 @@ pipeline {
                 sh 'mkdir -p "${WORKSPACE}/src/config/env"'
                 sh 'rm -f "${WORKSPACE}/src/config/env/.env.development"'
                 sh 'cp /projects/.env.development "${WORKSPACE}/src/config/env/"'
-                addBadge(text: "1.0.0")
+                addBadge(text: "${COMMIT_HASH}")
             }
         }
         stage('Deploy') {
