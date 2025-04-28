@@ -17,7 +17,7 @@ jobs:
       - name: Build, tag, and push image to AWS ECR backend
         id: build-image-cms
         run: |
-          if [ "${{ secrets.MY_SECRET }}" == "dev" ]; then
+          if [ "${{ secrets.STAGE }}" == "dev" ]; then
             echo "dev"
           fi
           docker build -t test -f Dockerfile .
