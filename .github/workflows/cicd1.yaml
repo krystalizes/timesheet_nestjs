@@ -22,4 +22,5 @@ jobs:
       - name: Build, tag, and push image to AWS ECR backend
         id: build-image-cms
         run: |
+          echo "GitHub Secret (example) is: ${{ secrets.STAGE }}"
           docker build -t test -f Dockerfile .
