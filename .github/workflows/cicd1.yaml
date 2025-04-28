@@ -2,11 +2,6 @@ name: Build CMS Package Image
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master 
-      - stg
-      - prod
 
 
 jobs:
